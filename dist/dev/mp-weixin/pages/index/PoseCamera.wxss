@@ -1,0 +1,20 @@
+
+.page {
+  position: relative;
+  z-index: 0;
+  height: 100vh;
+  width: 100vw;
+  color: #425066;
+}
+.gl,
+.camera,
+.canvas {
+  width: 100vw;
+  height: 90vh;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.canvas.canvas-input, .camera {
+  left: -100vw;
+}
