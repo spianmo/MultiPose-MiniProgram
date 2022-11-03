@@ -8,14 +8,6 @@ import {fetchFunc} from "../../tfjs-plugin/fetch";
 import {Frame, FrameAdapter} from "../../utils/FrameAdapter";
 import {Deps} from "./Deps";
 
-// setWasmPaths(
-//     {
-//       'tfjs-backend-wasm.wasm': '/tfjs-backend-wasm.wasm',
-//       'tfjs-backend-wasm-simd.wasm': '/tfjs-backend-wasm.wasm',
-//       'tfjs-backend-wasm-threaded-simd.wasm': '/tfjs-backend-wasm.wasm',
-//     },
-//     true,
-// );
 
 setupWechatPlatform({
   fetchFunc,
