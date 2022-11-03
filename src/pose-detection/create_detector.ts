@@ -15,8 +15,8 @@
  * =============================================================================
  */
 
-// import {load as loadBlazePoseMediaPipeDetector} from './blazepose_mediapipe/detector';
-// import {BlazePoseMediaPipeModelConfig, BlazePoseModelConfig} from './blazepose_mediapipe/types';
+import {load as loadBlazePoseMediaPipeDetector} from './blazepose_mediapipe/detector';
+import {BlazePoseMediaPipeModelConfig, BlazePoseModelConfig} from './blazepose_mediapipe/types';
 import {load as loadBlazePoseTfjsDetector} from './blazepose_tfjs/detector';
 import {BlazePoseTfjsModelConfig} from './blazepose_tfjs/types';
 import {load as loadMoveNetDetector} from './movenet/detector';
@@ -25,13 +25,11 @@ import {PoseDetector} from './pose_detector';
 import {load as loadPoseNetDetector} from './posenet/detector';
 import {PosenetModelConfig} from './posenet/types';
 import {SupportedModels} from './types';
-import {BlazePoseMediaPipeModelConfig, BlazePoseModelConfig} from "./blazepose_mediapipe/types";
 
 /**
  * Create a pose detector instance.
  *
  * @param model The name of the pipeline to load.
- * @param modelConfig
  */
 export async function createDetector(
     model: SupportedModels,
@@ -48,10 +46,10 @@ export async function createDetector(
           return loadBlazePoseTfjsDetector(
               modelConfig as BlazePoseTfjsModelConfig);
         }
-        // if (config.runtime === 'mediapipe') {
-        //   return loadBlazePoseMediaPipeDetector(
-        //       modelConfig as BlazePoseMediaPipeModelConfig);
-        // }
+        if (config.runtime === 'mediapipe') {
+          return loadBlazePoseMediaPipeDetector(
+              modelConfig as BlazePoseMediaPipeModelConfig);
+        }
         runtime = config.runtime;
       }
       throw new Error(

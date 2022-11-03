@@ -6,9 +6,9 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 const common_vendor = require("../../common/vendor.js");
-const poseDetection_calculators_convert_image_to_tensor = require("../calculators/convert_image_to_tensor.js");
-const poseDetection_calculators_image_utils = require("../calculators/image_utils.js");
-const poseDetection_calculators_shift_image_value = require("../calculators/shift_image_value.js");
+const poseDetection_shared_calculators_convert_image_to_tensor = require("../shared/calculators/convert_image_to_tensor.js");
+const poseDetection_shared_calculators_image_utils = require("../shared/calculators/image_utils.js");
+const poseDetection_shared_calculators_shift_image_value = require("../shared/calculators/shift_image_value.js");
 const poseDetection_posenet_calculators_decode_multiple_poses = require("./calculators/decode_multiple_poses.js");
 const poseDetection_posenet_calculators_decode_single_pose = require("./calculators/decode_single_pose.js");
 const poseDetection_posenet_calculators_flip_poses = require("./calculators/flip_poses.js");
@@ -60,11 +60,12 @@ class PosenetDetector {
       return [];
     }
     this.maxPoses = config.maxPoses;
-    const { imageTensor, padding } = poseDetection_calculators_convert_image_to_tensor.convertImageToTensor(
-      image,
-      { inputResolution: this.inputResolution, keepAspectRatio: true }
-    );
-    const imageValueShifted = this.architecture === "ResNet50" ? common_vendor.add(imageTensor, poseDetection_posenet_constants.RESNET_MEAN) : poseDetection_calculators_shift_image_value.shiftImageValue(imageTensor, [-1, 1]);
+    const { imageTensor, padding } = poseDetection_shared_calculators_convert_image_to_tensor.convertImageToTensor(image, {
+      outputTensorSize: this.inputResolution,
+      keepAspectRatio: true,
+      borderMode: "replicate"
+    });
+    const imageValueShifted = this.architecture === "ResNet50" ? common_vendor.add(imageTensor, poseDetection_posenet_constants.RESNET_MEAN) : poseDetection_shared_calculators_shift_image_value.shiftImageValue(imageTensor, [-1, 1]);
     const results = this.posenetModel.predict(imageValueShifted);
     let offsets, heatmap, displacementFwd, displacementBwd;
     if (this.architecture === "ResNet50") {
@@ -99,7 +100,7 @@ class PosenetDetector {
         config.nmsRadius
       );
     }
-    const imageSize = poseDetection_calculators_image_utils.getImageSize(image);
+    const imageSize = poseDetection_shared_calculators_image_utils.getImageSize(image);
     let scaledPoses = poseDetection_posenet_calculators_scale_poses.scalePoses(poses, imageSize, this.inputResolution, padding);
     if (config.flipHorizontal) {
       scaledPoses = poseDetection_posenet_calculators_flip_poses.flipPosesHorizontal(scaledPoses, imageSize);

@@ -1,4 +1,5 @@
 "use strict";
+const poseDetection_blazepose_mediapipe_detector = require("./blazepose_mediapipe/detector.js");
 const poseDetection_blazepose_tfjs_detector = require("./blazepose_tfjs/detector.js");
 const poseDetection_movenet_detector = require("./movenet/detector.js");
 const poseDetection_posenet_detector = require("./posenet/detector.js");
@@ -29,6 +30,11 @@ async function createDetector(model, modelConfig) {
       if (config != null) {
         if (config.runtime === "tfjs") {
           return poseDetection_blazepose_tfjs_detector.load(
+            modelConfig
+          );
+        }
+        if (config.runtime === "mediapipe") {
+          return poseDetection_blazepose_mediapipe_detector.load(
             modelConfig
           );
         }

@@ -19,6 +19,7 @@ In the runtime-backend dropdown, choose 'tfjs-webgl'.
 2.  [Usage](#usage)
 3.  [Performance](#performance)
 4.  [Bundle Size](#bundle-size)
+5.  [Model Quality](#model-quality)
 
 ## Installation
 
@@ -78,9 +79,15 @@ Pass in `poseDetection.SupportedModels.BlazePose` from the
     'lite', 'full', 'heavy'). If unset, the default is 'full'.
 
 *   *detectorModelUrl*: An optional string that specifies custom url of
-the detector model. This is useful for area/countries that don't have access to the model hosted on tf.hub.
+the detector model. This is useful for area/countries that don't have access to the model hosted on tf.hub. It also accepts `io.IOHandler` which can be used with
+[tfjs-react-native](https://github.com/tensorflow/tfjs/tree/master/tfjs-react-native)
+to load model from app bundle directory using
+[bundleResourceIO](https://github.com/tensorflow/tfjs/blob/master/tfjs-react-native/src/bundle_resource_io.ts#L169).
 *   *landmarkModelUrl* An optional string that specifies custom url of
-the landmark model. This is useful for area/countries that don't have access to the model hosted on tf.hub.
+the landmark model. This is useful for area/countries that don't have access to the model hosted on tf.hub. It also accepts `io.IOHandler` which can be used with
+[tfjs-react-native](https://github.com/tensorflow/tfjs/tree/master/tfjs-react-native)
+to load model from app bundle directory using
+[bundleResourceIO](https://github.com/tensorflow/tfjs/blob/master/tfjs-react-native/src/bundle_resource_io.ts#L169).
 
 ```javascript
 const model = poseDetection.SupportedModels.BlazePose;
@@ -121,7 +128,7 @@ Please refer to the Pose API
 about the structure of the returned `poses`.
 
 ## Performance
-To quantify the inference speed of MoveNet, the model was benchmarked across
+To quantify the inference speed of BlazePose, the model was benchmarked across
 multiple devices. The model latency (expressed in FPS) was measured on GPU with
 WebGL, as well as WebAssembly (WASM), which is the typical backend for devices
 with lower-end or no GPUs.
@@ -157,3 +164,16 @@ There is a difference of how things are loaded between the two runtimes. For the
 | Lite model | 10.41MB | 1.91s |
 | Full model | 13.8MB | 1.91s |
 | Heavy model | 34.7MB | 4.82s |
+
+## Model Quality
+To evaluate the quality of our models against other well-performing publicly available solutions, we use three different validation datasets, representing different verticals: Yoga, Dance and HIIT. Each image contains only a single person located 2-4 meters from the camera. To be consistent with other solutions, we perform evaluation only for 17 keypoints from [COCO topology](https://cocodataset.org/#keypoints-2020). For more detail, see the [article](https://google.github.io/mediapipe/solutions/pose#pose-estimation-quality).
+
+| Method | Yoga<br>[mAP](https://cocodataset.org/#keypoints-eval) | Yoga<br>[PCK@0.2](https://github.com/cbsudux/Human-Pose-Estimation-101#percentage-of-correct-key-points---pck) | Dance<br>[mAP](https://cocodataset.org/#keypoints-eval) | Dance<br>[PCK@0.2](https://github.com/cbsudux/Human-Pose-Estimation-101#percentage-of-correct-key-points---pck) | HIIT<br>[mAP](https://cocodataset.org/#keypoints-eval) | HIIT<br>[PCK@0.2](https://github.com/cbsudux/Human-Pose-Estimation-101#percentage-of-correct-key-points---pck) |
+| --- | --- | --- | --- | --- | --- | --- |
+| BlazePose.Heavy | 68.1 | 96.4 | 73.0 | 97.2 | 74.0 | 97.5 |
+| BlazePose.Full | 62.6 | 95.5 | 67.4 | 96.3 | 68.0 | 95.7 |
+| BlazePose.Lite | 45.0 | 90.2 | 53.6 | 92.5 | 53.8 | 93.5 |
+| [AlphaPose.ResNet50](https://github.com/MVIG-SJTU/AlphaPose) | 63.4 | 96.0 | 57.8 | 95.5 | 63.4 | 96.0 |
+| [Apple.Vision](https://developer.apple.com/documentation/vision/detecting_human_body_poses_in_images) | 32.8 | 82.7 | 36.4 | 91.4 | 44.5 | 88.6 |
+
+![Quality Chart](https://google.github.io/mediapipe/images/mobile/pose_tracking_pck_chart.png)

@@ -56,18 +56,19 @@ export function fetchFunc(url: string, options: any) {
   console.log('fetch start', url)
   return new Promise((resolve, reject) => {
     let successed = false;
-    const onSuccess = function (resp) {
+    const onSuccess = function (resp:any) {
       if (successed) return
       console.log('fetch done', url)
       successed = true;
       return resolve(parseResponse(url, resp));
     }
-    // @ts-ignore
+
     wx.request({
       url,
       method: options.method || 'GET',
       data: options.body,
       header: options.headers,
+      // @ts-ignore
       dataType,
       responseType: dataType,
       enableCache: true,
@@ -82,6 +83,7 @@ export function fetchFunc(url: string, options: any) {
           method: options.method || 'GET',
           data: options.body,
           header: options.headers,
+          // @ts-ignore
           dataType,
           responseType: dataType,
           enableCache: true,

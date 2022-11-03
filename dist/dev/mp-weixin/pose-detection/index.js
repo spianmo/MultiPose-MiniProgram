@@ -21,7 +21,8 @@ require("./posenet/calculators/decode_multiple_poses_util.js");
 const movenet = {
   modelType: {
     "SINGLEPOSE_LIGHTNING": poseDetection_movenet_constants.SINGLEPOSE_LIGHTNING,
-    "SINGLEPOSE_THUNDER": poseDetection_movenet_constants.SINGLEPOSE_THUNDER
+    "SINGLEPOSE_THUNDER": poseDetection_movenet_constants.SINGLEPOSE_THUNDER,
+    "MULTIPOSE_LIGHTNING": poseDetection_movenet_constants.MULTIPOSE_LIGHTNING
   }
 };
 exports.movenet = movenet;

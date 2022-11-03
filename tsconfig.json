@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    "preserveConstEnums": true,
+    "declaration": true,
     "useDefineForClassFields": true,
     "module": "esnext",
     "moduleResolution": "node",
@@ -9,6 +11,13 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
     "lib": ["esnext", "dom"],
     "types": ["@dcloudio/types", "@types/wechat-miniprogram"]
   },

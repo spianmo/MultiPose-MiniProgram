@@ -36,11 +36,11 @@ onReady(async () => {
   const t = Date.now()
 
   // @ts-ignored
-  model.estimatePoses(onePixel, {flipHorizontal: false})
+  await model.estimatePoses(onePixel, {flipHorizontal: false})
   console.log('movenet warm up', Date.now() - t)
   const painter = new Painter()
 
-  const onFrame = (frame: { width: any; height: any; data: Iterable<number>; }, deps: Deps) => {
+  const onFrame = async (frame: { width: any; height: any; data: Iterable<number>; }, deps: Deps) => {
     const {ctx, canvas2D} = deps;
     const video = {
       width: frame.width,
@@ -51,8 +51,8 @@ onReady(async () => {
     helper.value.drawCanvas2D(frame);
 
     const t = Date.now()
-    // @ts-ignore
-    const prediction = model.estimatePoses(video, {flipHorizontal: false})
+    // @ts-ignored
+    const prediction = await model.estimatePoses(video, {flipHorizontal: false})
     console.log('predict cost', Date.now() - t)
 
     painter.setCtx(ctx);

@@ -9,6 +9,9 @@ TFJS API [mediapipe.dev](https://mediapipe.dev). Three models are offered.
 
 Please try our our live [demo](https://storage.googleapis.com/tfjs-models/demos/pose-detection/index.html?model=blazepose).
 
+Note that BlazePose-MediaPipe uses WebAssembly behind the scene and cannot be
+used with [tfjs-react-native](https://github.com/tensorflow/tfjs/tree/master/tfjs-react-native).
+
 --------------------------------------------------------------------------------
 
 ## Table of Contents
@@ -17,6 +20,7 @@ Please try our our live [demo](https://storage.googleapis.com/tfjs-models/demos/
 2.  [Usage](#usage)
 3.  [Performance](#performance)
 4.  [Bundle Size](#bundle-size)
+5.  [Model Quality](#model-quality)
 
 ## Installation
 
@@ -29,7 +33,12 @@ runtime. The guide for TensorFlow.js runtime can be found
 Via script tags:
 
 ```html
+<!-- Require the peer dependencies of pose-detection. -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+
+<!-- You must explicitly require a TF.js backend if you're not using the TF.js union bundle. -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
 ```
@@ -37,8 +46,9 @@ Via script tags:
 Via npm:
 
 ```sh
-yarn add @tensorflow-models/pose-detection
 yarn add @mediapipe/pose
+yarn add @tensorflow/tfjs-core, @tensorflow/tfjs-backend-webgl
+yarn add @tensorflow-models/pose-detection
 ```
 
 -----------------------------------------------------------------------
@@ -50,6 +60,9 @@ If you are using the Pose API via npm, you need to import the libraries first.
 
 ```javascript
 import * as poseDetection from '@tensorflow-models/pose-detection';
+import '@tensorflow/tfjs-core';
+// Register WebGL backend.
+import '@tensorflow/tfjs-backend-webgl';
 import '@mediapipe/pose';
 ```
 
@@ -64,6 +77,11 @@ Pass in `poseDetection.SupportedModels.BlazePose` from the
 
 *   *enableSmoothing*: Defaults to true. If your input is a static image, set it to false. This flag is used to indicate whether to use temporal filter to smooth the predicted keypoints.
 
+*   *enableSegmentation*: Defaults to false. A boolean indicating whether to generate the segmentation mask.
+
+*   *smoothSegmentation*: Defaults to true. A boolean indicating whether the solution filters segmentation masks across different input images to reduce jitter.
+    Ignored if `enableSegmentation` is false or static images are passed in.
+
 *   *modelType*: specify which variant to load from `BlazePoseModelType` (i.e.,
     'lite', 'full', 'heavy'). If unset, the default is 'full'.
 
@@ -73,7 +91,8 @@ Pass in `poseDetection.SupportedModels.BlazePose` from the
 const model = poseDetection.SupportedModels.BlazePose;
 const detectorConfig = {
   runtime: 'mediapipe',
-  solutionPath: 'base/node_modules/@mediapipe/pose'
+  solutionPath: 'https://cdn.jsdelivr.net/npm/@mediapipe/pose'
+                // or 'base/node_modules/@mediapipe/pose' in npm.
 };
 detector = await poseDetection.createDetector(model, detectorConfig);
 ```
@@ -104,7 +123,7 @@ Please refer to the Pose API
 about the structure of the returned `poses`.
 
 ## Performance
-To quantify the inference speed of MoveNet, the model was benchmarked across
+To quantify the inference speed of BlazePose, the model was benchmarked across
 multiple devices. The model latency (expressed in FPS) was measured on GPU with
 WebGL, as well as WebAssembly (WASM), which is the typical backend for devices
 with lower-end or no GPUs.
@@ -140,3 +159,16 @@ There is a difference of how things are loaded between the two runtimes. For the
 | Lite model | 10.41MB | 1.91s |
 | Full model | 13.8MB | 1.91s |
 | Heavy model | 34.7MB | 4.82s |
+
+## Model Quality
+To evaluate the quality of our models against other well-performing publicly available solutions, we use three different validation datasets, representing different verticals: Yoga, Dance and HIIT. Each image contains only a single person located 2-4 meters from the camera. To be consistent with other solutions, we perform evaluation only for 17 keypoints from [COCO topology](https://cocodataset.org/#keypoints-2020). For more detail, see the [article](https://google.github.io/mediapipe/solutions/pose#pose-estimation-quality).
+
+| Method | Yoga<br>[mAP](https://cocodataset.org/#keypoints-eval) | Yoga<br>[PCK@0.2](https://github.com/cbsudux/Human-Pose-Estimation-101#percentage-of-correct-key-points---pck) | Dance<br>[mAP](https://cocodataset.org/#keypoints-eval) | Dance<br>[PCK@0.2](https://github.com/cbsudux/Human-Pose-Estimation-101#percentage-of-correct-key-points---pck) | HIIT<br>[mAP](https://cocodataset.org/#keypoints-eval) | HIIT<br>[PCK@0.2](https://github.com/cbsudux/Human-Pose-Estimation-101#percentage-of-correct-key-points---pck) |
+| --- | --- | --- | --- | --- | --- | --- |
+| BlazePose.Heavy | 68.1 | 96.4 | 73.0 | 97.2 | 74.0 | 97.5 |
+| BlazePose.Full | 62.6 | 95.5 | 67.4 | 96.3 | 68.0 | 95.7 |
+| BlazePose.Lite | 45.0 | 90.2 | 53.6 | 92.5 | 53.8 | 93.5 |
+| [AlphaPose.ResNet50](https://github.com/MVIG-SJTU/AlphaPose) | 63.4 | 96.0 | 57.8 | 95.5 | 63.4 | 96.0 |
+| [Apple.Vision](https://developer.apple.com/documentation/vision/detecting_human_body_poses_in_images) | 32.8 | 82.7 | 36.4 | 91.4 | 44.5 | 88.6 |
+
+![Quality Chart](https://google.github.io/mediapipe/images/mobile/pose_tracking_pck_chart.png)

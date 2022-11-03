@@ -154,6 +154,7 @@ export function initWebGL(
         tf.registerKernel(newKernelConfig);
       });
     } catch (e) {
+      // @ts-ignore
       throw (new Error(`Failed to register Webgl backend: ${e.message}`));
     }
   }

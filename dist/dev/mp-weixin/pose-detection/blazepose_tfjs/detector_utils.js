@@ -21,6 +21,12 @@ function validateModelConfig(modelConfig) {
   if (config.enableSmoothing == null) {
     config.enableSmoothing = poseDetection_blazepose_tfjs_constants.DEFAULT_BLAZEPOSE_MODEL_CONFIG.enableSmoothing;
   }
+  if (config.enableSegmentation == null) {
+    config.enableSegmentation = poseDetection_blazepose_tfjs_constants.DEFAULT_BLAZEPOSE_MODEL_CONFIG.enableSegmentation;
+  }
+  if (config.smoothSegmentation == null) {
+    config.smoothSegmentation = poseDetection_blazepose_tfjs_constants.DEFAULT_BLAZEPOSE_MODEL_CONFIG.smoothSegmentation;
+  }
   if (config.modelType == null) {
     config.modelType = poseDetection_blazepose_tfjs_constants.DEFAULT_BLAZEPOSE_MODEL_CONFIG.modelType;
   }

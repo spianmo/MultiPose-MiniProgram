@@ -15,10 +15,10 @@
  * limitations under the License.
  * =============================================================================
  */
-const DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL = "http://oss.cache.ren/img/blazepose/detector/f16/model.json";
-const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_FULL = "http://oss.cache.ren/img/blazepose/landmark/full-f16/model.json";
-const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE = "http://oss.cache.ren/img/blazepose/landmark/lite-f16/model.json";
-const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_HEAVY = "http://oss.cache.ren/img/blazepose/landmark/heavy-f16/model.json";
+const DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL = "https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/detector/1";
+const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_FULL = "https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/full/2";
+const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE = "https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/lite/2";
+const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_HEAVY = "https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/heavy/2";
 const BLAZEPOSE_DETECTOR_ANCHOR_CONFIGURATION = {
   reduceBoxesInLowestlayer: false,
   interpolatedScaleAspectRatio: 1,
@@ -39,6 +39,8 @@ const DEFAULT_BLAZEPOSE_MODEL_CONFIG = {
   runtime: "tfjs",
   modelType: "full",
   enableSmoothing: true,
+  enableSegmentation: false,
+  smoothSegmentation: true,
   detectorModelUrl: DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
   landmarkModelUrl: DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_FULL
 };
@@ -67,8 +69,8 @@ const BLAZEPOSE_TENSORS_TO_DETECTION_CONFIGURATION = {
   minScoreThresh: 0.5
 };
 const BLAZEPOSE_DETECTOR_NON_MAX_SUPPRESSION_CONFIGURATION = {
-  minScoreThreshold: -1,
-  minSuppressionThreshold: 0.3
+  minSuppressionThreshold: 0.3,
+  overlapType: "intersection-over-union"
 };
 const BLAZEPOSE_DETECTOR_RECT_TRANSFORMATION_CONFIG = {
   shiftX: 0,
@@ -78,18 +80,33 @@ const BLAZEPOSE_DETECTOR_RECT_TRANSFORMATION_CONFIG = {
   squareLong: true
 };
 const BLAZEPOSE_DETECTOR_IMAGE_TO_TENSOR_CONFIG = {
-  inputResolution: { width: 224, height: 224 },
-  keepAspectRatio: true
+  outputTensorSize: { width: 224, height: 224 },
+  keepAspectRatio: true,
+  outputTensorFloatRange: [-1, 1],
+  borderMode: "zero"
 };
 const BLAZEPOSE_LANDMARK_IMAGE_TO_TENSOR_CONFIG = {
-  inputResolution: { width: 256, height: 256 },
-  keepAspectRatio: true
+  outputTensorSize: { width: 256, height: 256 },
+  keepAspectRatio: true,
+  outputTensorFloatRange: [0, 1],
+  borderMode: "zero"
 };
 const BLAZEPOSE_POSE_PRESENCE_SCORE = 0.5;
 const BLAZEPOSE_TENSORS_TO_LANDMARKS_CONFIG = {
   numLandmarks: 39,
   inputImageWidth: 256,
-  inputImageHeight: 256
+  inputImageHeight: 256,
+  visibilityActivation: "sigmoid",
+  flipHorizontally: false,
+  flipVertically: false
+};
+const BLAZEPOSE_TENSORS_TO_WORLD_LANDMARKS_CONFIG = {
+  numLandmarks: 39,
+  inputImageWidth: 1,
+  inputImageHeight: 1,
+  visibilityActivation: "sigmoid",
+  flipHorizontally: false,
+  flipVertically: false
 };
 const BLAZEPOSE_REFINE_LANDMARKS_FROM_HEATMAP_CONFIG = {
   kernelSize: 7,
@@ -103,8 +120,8 @@ const BLAZEPOSE_VISIBILITY_SMOOTHING_CONFIG = {
 const BLAZEPOSE_LANDMARKS_SMOOTHING_CONFIG_ACTUAL = {
   oneEuroFilter: {
     frequency: 30,
-    minCutOff: 0.1,
-    beta: 40,
+    minCutOff: 0.05,
+    beta: 80,
     derivateCutOff: 1,
     minAllowedObjectScale: 1e-6
   }
@@ -113,10 +130,26 @@ const BLAZEPOSE_LANDMARKS_SMOOTHING_CONFIG_AUXILIARY = {
   oneEuroFilter: {
     frequency: 30,
     minCutOff: 0.01,
-    beta: 1,
+    beta: 10,
     derivateCutOff: 1,
     minAllowedObjectScale: 1e-6
   }
+};
+const BLAZEPOSE_WORLD_LANDMARKS_SMOOTHING_CONFIG_ACTUAL = {
+  oneEuroFilter: {
+    frequency: 30,
+    minCutOff: 0.1,
+    beta: 40,
+    derivateCutOff: 1,
+    minAllowedObjectScale: 1e-6,
+    disableValueScaling: true
+  }
+};
+const BLAZEPOSE_TENSORS_TO_SEGMENTATION_CONFIG = {
+  activation: "none"
+};
+const BLAZEPOSE_SEGMENTATION_SMOOTHING_CONFIG = {
+  combineWithPreviousRatio: 0.7
 };
 exports.BLAZEPOSE_DETECTOR_ANCHOR_CONFIGURATION = BLAZEPOSE_DETECTOR_ANCHOR_CONFIGURATION;
 exports.BLAZEPOSE_DETECTOR_IMAGE_TO_TENSOR_CONFIG = BLAZEPOSE_DETECTOR_IMAGE_TO_TENSOR_CONFIG;
@@ -129,9 +162,13 @@ exports.BLAZEPOSE_NUM_AUXILIARY_KEYPOINTS = BLAZEPOSE_NUM_AUXILIARY_KEYPOINTS;
 exports.BLAZEPOSE_NUM_KEYPOINTS = BLAZEPOSE_NUM_KEYPOINTS;
 exports.BLAZEPOSE_POSE_PRESENCE_SCORE = BLAZEPOSE_POSE_PRESENCE_SCORE;
 exports.BLAZEPOSE_REFINE_LANDMARKS_FROM_HEATMAP_CONFIG = BLAZEPOSE_REFINE_LANDMARKS_FROM_HEATMAP_CONFIG;
+exports.BLAZEPOSE_SEGMENTATION_SMOOTHING_CONFIG = BLAZEPOSE_SEGMENTATION_SMOOTHING_CONFIG;
 exports.BLAZEPOSE_TENSORS_TO_DETECTION_CONFIGURATION = BLAZEPOSE_TENSORS_TO_DETECTION_CONFIGURATION;
 exports.BLAZEPOSE_TENSORS_TO_LANDMARKS_CONFIG = BLAZEPOSE_TENSORS_TO_LANDMARKS_CONFIG;
+exports.BLAZEPOSE_TENSORS_TO_SEGMENTATION_CONFIG = BLAZEPOSE_TENSORS_TO_SEGMENTATION_CONFIG;
+exports.BLAZEPOSE_TENSORS_TO_WORLD_LANDMARKS_CONFIG = BLAZEPOSE_TENSORS_TO_WORLD_LANDMARKS_CONFIG;
 exports.BLAZEPOSE_VISIBILITY_SMOOTHING_CONFIG = BLAZEPOSE_VISIBILITY_SMOOTHING_CONFIG;
+exports.BLAZEPOSE_WORLD_LANDMARKS_SMOOTHING_CONFIG_ACTUAL = BLAZEPOSE_WORLD_LANDMARKS_SMOOTHING_CONFIG_ACTUAL;
 exports.DEFAULT_BLAZEPOSE_ESTIMATION_CONFIG = DEFAULT_BLAZEPOSE_ESTIMATION_CONFIG;
 exports.DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_FULL = DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_FULL;
 exports.DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_HEAVY = DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_HEAVY;
