@@ -31,7 +31,7 @@ const state = reactive({
 
 onReady(async () => {
   await tf.ready()
-  const model = await createDetector(SupportedModels.MoveNet, {modelType: movenet.modelType.SINGLEPOSE_LIGHTNING})
+  const model = await createDetector(SupportedModels.MoveNet, {modelType: movenet.modelType.SINGLEPOSE_THUNDER})
   console.log('movenet load end')
   const t = Date.now()
 
