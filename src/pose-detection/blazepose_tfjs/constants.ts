@@ -19,13 +19,13 @@ import {ImageToTensorConfig, TensorsToLandmarksConfig} from '../shared/calculato
 import {BlazePoseTfjsModelConfig} from './types';
 
 export const DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL =
-    'https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/detector/1';
+    'http://oss.cache.ren/img/blazepose_3d/detector/1/model.json';
 export const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_FULL =
-    'https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/full/2';
+    'http://oss.cache.ren/img/blazepose_3d/landmark/full/2/model.json';
 export const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE =
-    'https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/lite/2';
+    'http://oss.cache.ren/img/blazepose_3d/landmark/lite/2/model.json';
 export const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_HEAVY =
-    'https://tfhub.dev/mediapipe/tfjs-model/blazepose_3d/landmark/heavy/2';
+    'http://oss.cache.ren/img/blazepose_3d/landmark/heavy/2/model.json';
 export const BLAZEPOSE_DETECTOR_ANCHOR_CONFIGURATION = {
   reduceBoxesInLowestlayer: false,
   interpolatedScaleAspectRatio: 1.0,

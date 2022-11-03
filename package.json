@@ -54,7 +54,6 @@
     "@tensorflow/tfjs-converter": "^4.0.0",
     "@tensorflow/tfjs-core": "^4.0.0",
     "abab": "^2.0.5",
-    "fetch-wechat": "^0.0.3",
     "seedrandom": "~2.4.3",
     "text-encoder": "^0.0.4",
     "three-platformize": "^1.133.1",

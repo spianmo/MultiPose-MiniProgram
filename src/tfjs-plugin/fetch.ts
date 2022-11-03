@@ -90,7 +90,7 @@ export function fetchFunc(url: string, options: any) {
           success: onSuccess,
           fail: reject,
         });
-      }, 200);
+      }, 600);
     }
   });
 };

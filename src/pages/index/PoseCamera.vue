@@ -141,7 +141,7 @@ defineExpose({
 </script>
 <template>
   <div class="pose-camera">
-    <camera class="camera" frame-size="medium" resolution="high" device-position="back"/>
+    <camera class="camera" frame-size="medium" resolution="medium" device-position="back"/>
     <canvas class="canvas" type="2d" id="canvas" :style="{
       width: `${state.canvas2DW}px`,
       height: `${state.canvas2DH}px`

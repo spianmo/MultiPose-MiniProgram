@@ -19,6 +19,7 @@ import * as poseDetection from '../pose-detection';
 export class Painter {
   ctx!: CanvasRenderingContext2D;
   canvas2D!: HTMLCanvasElement;
+  model!: poseDetection.SupportedModels;
 
   setCtx(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx
@@ -53,8 +54,9 @@ export class Painter {
    * @param keypoints A list of keypoints.
    */
   drawKeypoints(keypoints: Array<poseDetection.Keypoint>) {
+
     const keypointInd =
-      poseDetection.util.getKeypointIndexBySide(poseDetection.SupportedModels.MoveNet);
+      poseDetection.util.getKeypointIndexBySide(this.model);
     this.ctx.fillStyle = 'White';
     this.ctx.strokeStyle = 'White';
     this.ctx.lineWidth = 2;
@@ -97,7 +99,7 @@ export class Painter {
     this.ctx.strokeStyle = 'White';
     this.ctx.lineWidth = 2;
 
-    poseDetection.util.getAdjacentPairs(poseDetection.SupportedModels.MoveNet).forEach(([
+    poseDetection.util.getAdjacentPairs(this.model).forEach(([
       i, j
     ]) => {
       const kp1 = keypoints[i];
@@ -115,5 +117,9 @@ export class Painter {
         this.ctx.stroke();
       }
     });
+  }
+
+  setModel(model: poseDetection.SupportedModels) {
+    this.model = model
   }
 }

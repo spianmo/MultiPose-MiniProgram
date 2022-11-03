@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import * as tf from '@tensorflow/tfjs-core';
 import {onHide, onReady, onShow} from "@dcloudio/uni-app";
-import {createDetector, movenet, SupportedModels} from "../../pose-detection";
+import {BlazePoseModelType, createDetector, movenet, SupportedModels} from "../../pose-detection";
 import {Painter} from "../../utils/painter";
 import {Deps} from "./Deps";
 import PoseCamera from "./PoseCamera.vue";
@@ -31,7 +31,7 @@ const state = reactive({
 
 onReady(async () => {
   await tf.ready()
-  const model = await createDetector(SupportedModels.MoveNet, {modelType: movenet.modelType.SINGLEPOSE_THUNDER})
+  const model = await createDetector(SupportedModels.BlazePose, {runtime: 'tfjs', modelType: 'lite', enableSmoothing: false})
   console.log('movenet load end')
   const t = Date.now()
 
@@ -56,6 +56,7 @@ onReady(async () => {
     console.log('predict cost', Date.now() - t)
 
     painter.setCtx(ctx);
+    painter.setModel(SupportedModels.BlazePose);
     painter.setCanvas2D(canvas2D);
     painter.drawResults(prediction);
   }
