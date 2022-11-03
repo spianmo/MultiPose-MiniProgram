@@ -109,7 +109,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
     });
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.sr(helper, "d36a244c-0", {
+        a: common_vendor.sr(helper, "607a84ee-0", {
           "k": "helper"
         }),
         b: common_vendor.t(state.isDetect ? "\u505C\u6B62\u8BC6\u522B" : "\u5F00\u59CB\u8BC6\u522B"),
@@ -118,5 +118,5 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
     };
   }
 });
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__file", "D:/HealBoneProjects/WeChatProjects/cv-medical-miniprogram-vue3-ts/src/pages/index/index.vue"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__file", "D:/Projects/HealBoneProjects/WeChatProjects/cv-medical-miniprogram-vue3-ts/src/pages/index/index.vue"]]);
 wx.createPage(MiniProgramPage);

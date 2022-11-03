@@ -62,6 +62,7 @@ export function fetchFunc(url: string, options: any) {
       successed = true;
       return resolve(parseResponse(url, resp));
     }
+    // @ts-ignore
     wx.request({
       url,
       method: options.method || 'GET',

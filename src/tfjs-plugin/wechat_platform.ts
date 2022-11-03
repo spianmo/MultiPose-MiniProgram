@@ -18,6 +18,7 @@
 import * as webgl_backend from '@tensorflow/tfjs-backend-webgl';
 import * as tfjs from '@tensorflow/tfjs-core';
 import { atob, btoa } from 'abab';
+// @ts-ignore
 import { TextDecoder, TextEncoder } from 'text-encoder';
 
 export interface SystemConfig {
