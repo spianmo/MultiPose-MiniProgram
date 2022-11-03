@@ -85,13 +85,10 @@ onMounted(async () => {
   state.backend = tf.getBackend()
 
   nextTick(async () => {
-    const [{node: canvasGL}] = await getNode('#gl', instance);
     const [{node: canvas2D}] = await getNode('#canvas', instance);
-    const [{node: canvasInput}] = await getNode('#canvas-input', instance);
-    console.log(canvasGL, canvas2D, canvasInput)
+
     console.log('helper view get canvas node');
     const ctx = canvas2D.getContext('2d') as CanvasRenderingContext2D;
-    const inputCtx = canvasInput.getContext('2d') as CanvasRenderingContext2D;
 
     const cameraCtx = wx.createCameraContext();
     const frameAdapter = new FrameAdapter();
@@ -122,10 +119,7 @@ onMounted(async () => {
     });
     deps = {
       ctx,
-      inputCtx,
-      canvasGL,
       canvas2D,
-      canvasInput,
       cameraCtx,
       frameAdapter,
       cameraListener,
@@ -155,9 +149,11 @@ defineExpose({
 </script>
 <template>
   <div class="pose-camera">
-    <camera class="camera" frame-size="medium" device-position="front"/>
-    <canvas class="gl" type="webgl" id="gl"></canvas>
-    <canvas class="canvas" type="2d" id="canvas"></canvas>
+    <camera class="camera" frame-size="medium" resolution="high" device-position="back"/>
+    <canvas class="canvas" type="2d" id="canvas" :style="{
+      width: `${state.canvas2DW}px`,
+      height: `${state.canvas2DH}px`
+    }"></canvas>
     <canvas class="canvas canvas-input" type="2d" id="canvas-input"></canvas>
   </div>
 </template>
@@ -176,10 +172,6 @@ defineExpose({
   }
 
   .camera {
-    display: none;
-  }
-
-  .gl {
     display: none;
   }
 }

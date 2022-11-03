@@ -38,6 +38,3 @@
 .pose-camera .camera {
   display: none;
 }
-.pose-camera .gl {
-  display: none;
-}

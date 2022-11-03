@@ -1,1 +1,1 @@
-<view class="pose-camera"><camera class="camera" frame-size="medium" device-position="front"/><canvas class="gl" type="webgl" id="gl"></canvas><canvas class="canvas" type="2d" id="canvas"></canvas><canvas class="canvas canvas-input" type="2d" id="canvas-input"></canvas></view>
+<view class="pose-camera"><camera class="camera" frame-size="medium" resolution="high" device-position="back"/><canvas class="canvas" type="2d" id="canvas" style="{{'width:' + a + ';' + ('height:' + b)}}"></canvas><canvas class="canvas canvas-input" type="2d" id="canvas-input"></canvas></view>

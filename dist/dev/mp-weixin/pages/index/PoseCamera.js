@@ -52,13 +52,9 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       console.log("helper view ready");
       state.backend = common_vendor.getBackend();
       common_vendor.nextTick(async () => {
-        const [{ node: canvasGL }] = await utils_utils.getNode("#gl", instance);
         const [{ node: canvas2D }] = await utils_utils.getNode("#canvas", instance);
-        const [{ node: canvasInput }] = await utils_utils.getNode("#canvas-input", instance);
-        console.log(canvasGL, canvas2D, canvasInput);
         console.log("helper view get canvas node");
         const ctx = canvas2D.getContext("2d");
-        const inputCtx = canvasInput.getContext("2d");
         const cameraCtx = wx.createCameraContext();
         const frameAdapter = new utils_FrameAdapter.FrameAdapter();
         const cameraListener = cameraCtx.onCameraFrame(
@@ -86,10 +82,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
         });
         deps = {
           ctx,
-          inputCtx,
-          canvasGL,
           canvas2D,
-          canvasInput,
           cameraCtx,
           frameAdapter,
           cameraListener
@@ -111,7 +104,10 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       stop
     });
     return (_ctx, _cache) => {
-      return {};
+      return {
+        a: `${state.canvas2DW}px`,
+        b: `${state.canvas2DH}px`
+      };
     };
   }
 });

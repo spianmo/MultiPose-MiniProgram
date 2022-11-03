@@ -108,7 +108,6 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       helper.value.set({ onFrame });
     });
     const toggleDetect = () => {
-      console.log("\u8C03\u7528\u4E86");
       if (!state.isDetect) {
         common_vendor.unref(helper).start();
         state.isDetect = true;

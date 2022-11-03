@@ -64,7 +64,6 @@ onReady(async () => {
 })
 
 const toggleDetect = () => {
-  console.log("调用了")
   if (!state.isDetect) {
     unref(helper).start()
     state.isDetect = true

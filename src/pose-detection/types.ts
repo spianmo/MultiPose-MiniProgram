@@ -14,10 +14,11 @@
  * limitations under the License.
  * =============================================================================
  */
+// @ts-ignore
 import {Keypoint, PixelInput, Segmentation} from './shared/calculators/interfaces/common_interfaces';
 import {BoundingBox} from './shared/calculators/interfaces/shape_interfaces';
 
-// export {Keypoint};
+export type Keypoint = Keypoint
 
 export enum SupportedModels {
   MoveNet = 'MoveNet',
