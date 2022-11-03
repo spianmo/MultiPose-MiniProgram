@@ -1,9 +1,7 @@
 "use strict";
 function getNode(id, ctx) {
   return new Promise((resolve) => {
-    wx.createSelectorQuery().in(ctx).select(id).fields({ node: true, rect: true, size: true }).exec((res) => {
-      resolve(res);
-    });
+    wx.createSelectorQuery().in(ctx).select(id).fields({ node: true, rect: true, size: true }).exec(resolve);
   });
 }
 function objectFit(imgW, imgH, canW, canH) {
@@ -19,5 +17,11 @@ function objectFit(imgW, imgH, canW, canH) {
   }
   return [w, h];
 }
+const onePixel = {
+  width: 1,
+  height: 1,
+  data: new Uint8Array([0, 0, 0, 1])
+};
 exports.getNode = getNode;
 exports.objectFit = objectFit;
+exports.onePixel = onePixel;

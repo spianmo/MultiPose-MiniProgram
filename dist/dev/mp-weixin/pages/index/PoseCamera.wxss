@@ -6,11 +6,14 @@
   width: 100vw;
   color: #425066;
 }
-.gl,
+.gl {
+  width: 0;
+  height: 0;
+}
 .camera,
 .canvas {
   width: 100vw;
-  height: 90vh;
+  height: 100vh;
   position: absolute;
   bottom: 0;
   left: 0;

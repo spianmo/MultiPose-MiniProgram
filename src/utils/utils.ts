@@ -1,11 +1,13 @@
+import SelectorQuery = WechatMiniprogram.SelectorQuery;
+import TrivialInstance = WechatMiniprogram.Page.TrivialInstance;
+
+
 export function getNode(
     id: string,
     ctx: any,
 ): Promise<[{ node: HTMLCanvasElement; width: number; height: Number }]> {
     return new Promise(resolve => {
-        wx.createSelectorQuery().in(ctx).select(id).fields({ node: true, rect: true, size: true }).exec(res=>{
-            resolve(res)
-        });
+        wx.createSelectorQuery().in(ctx).select(id).fields({ node: true, rect: true, size: true }).exec(resolve);
     });
 }
 

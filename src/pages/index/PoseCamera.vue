@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import * as tf from '@tensorflow/tfjs-core';
 import * as webgl from '@tensorflow/tfjs-backend-webgl';
-import {createDetector, movenet, SupportedModels} from "../../pose-detection";
-import {getCurrentInstance, onMounted, onUnmounted} from "vue";
-import {getNode, objectFit, onePixel} from "../../utils/utils";
+import {getCurrentInstance, nextTick, onMounted, onUnmounted, reactive} from "vue";
+import {getNode, objectFit} from "../../utils/utils";
 import {setupWechatPlatform} from "../../tfjs-plugin/wechat_platform";
 import {fetchFunc} from "../../tfjs-plugin/fetch";
 import {Frame, FrameAdapter} from "../../utils/FrameAdapter";
-
+import {Deps} from "./Deps";
+import { defineExpose, ref  } from 'vue'
 
 // setWasmPaths(
 //     {
@@ -28,25 +28,15 @@ setupWechatPlatform({
 
 tf.enableProdMode()
 
-let deps: {
-  canvasGL: HTMLCanvasElement;
-  canvas2D: HTMLCanvasElement;
-  canvasInput: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-  inputCtx: CanvasRenderingContext2D;
-
-  frameAdapter: FrameAdapter;
-  cameraCtx: WechatMiniprogram.CameraContext;
-  cameraListener: WechatMiniprogram.CameraFrameListener;
-};
-
-let userInitedResolver;
-
 let userFrameCallback: (frame: Frame, deps: any) => Promise<any> | void;
 
-const { windowWidth, windowHeight } = wx.getSystemInfoSync()
+const {windowWidth, windowHeight} = wx.getSystemInfoSync()
 
-const state:{
+const instance = getCurrentInstance()
+
+let deps: Deps
+
+const state: {
   FPS: string,
   backend: string,
   inited: boolean,
@@ -54,7 +44,7 @@ const state:{
   switchingBackend: boolean,
   canvas2DW: number,
   canvas2DH: number,
-} = defineReactive({
+} = reactive({
   FPS: '0',
   backend: '',
   inited: false,
@@ -84,74 +74,87 @@ const stop = () => {
   deps.cameraListener.stop();
 }
 
+const set =  (cfg: {
+      onFrame: (frame: Frame, deps: any) => Promise<any> | void;
+    }) => {
+      userFrameCallback = cfg.onFrame;
+    }
+
 onMounted(async () => {
-  const userInitPromise = new Promise(resolve => {
-    userInitedResolver = resolve;
-  });
   await wx.showLoading({title: '初始化中', mask: false});
   console.log('helper view ready');
   state.backend = tf.getBackend()
-  console.log("================>", getCurrentPages())
-  const [{ node: canvasGL }] = await getNode('#gl');
-  const [{ node: canvas2D }] = await getNode('#canvas');
-  const [{ node: canvasInput }] = await getNode('#canvas-input');
-  console.log('helper view get canvas node');
 
-  const ctx = canvas2D.getContext('2d') as CanvasRenderingContext2D;
-  const inputCtx = canvasInput.getContext('2d') as CanvasRenderingContext2D;
+  nextTick(async () => {
+    const [{node: canvasGL}] = await getNode('#gl', instance);
+    const [{node: canvas2D}] = await getNode('#canvas', instance);
+    const [{node: canvasInput}] = await getNode('#canvas-input', instance);
+    console.log(canvasGL, canvas2D, canvasInput)
+    console.log('helper view get canvas node');
+    const ctx = canvas2D.getContext('2d') as CanvasRenderingContext2D;
+    const inputCtx = canvasInput.getContext('2d') as CanvasRenderingContext2D;
 
-  const cameraCtx = wx.createCameraContext();
-  const frameAdapter = new FrameAdapter();
-  const cameraListener = cameraCtx.onCameraFrame(
-      frameAdapter.triggerFrame.bind(frameAdapter),
-  );
-  let canvasSizeInited = false;
+    const cameraCtx = wx.createCameraContext();
+    const frameAdapter = new FrameAdapter();
+    const cameraListener = cameraCtx.onCameraFrame(
+        frameAdapter.triggerFrame.bind(frameAdapter),
+    );
+    let canvasSizeInited = false;
 
-  frameAdapter.onProcessFrame(async frame => {
-    if (!canvasSizeInited) {
-      const [canvas2DW, canvas2DH] = objectFit(
-          frame.width,
-          frame.height,
-          windowWidth,
-          windowHeight * 0.9,
-      );
-      state.canvas2DH = canvas2DH
-      state.canvas2DW = canvas2DW
-      canvasSizeInited = true;
-    }
-    if (userFrameCallback && !state.switchingBackend) {
-      const t = Date.now();
-      userFrameCallback(frame, deps);
-      // @ts-ignore
-      await new Promise(resolve => canvas2D.requestAnimationFrame(resolve));
-      state.FPS = (1000 / (Date.now() - t)).toFixed(2)
-    }
-  });
-  deps = {
-    ctx,
-    inputCtx,
-    canvasGL,
-    canvas2D,
-    canvasInput,
-    cameraCtx,
-    frameAdapter,
-    cameraListener,
-  };
-  console.log('helper view inited');
-
-  await userInitPromise;
-  await wx.hideLoading();
-  deps.cameraListener.start();
+    frameAdapter.onProcessFrame(async frame => {
+      if (!canvasSizeInited) {
+        const [canvas2DW, canvas2DH] = objectFit(
+            frame.width,
+            frame.height,
+            windowWidth,
+            windowHeight * 0.9,
+        );
+        state.canvas2DH = canvas2DH
+        state.canvas2DW = canvas2DW
+        canvasSizeInited = true;
+      }
+      if (userFrameCallback && !state.switchingBackend) {
+        const t = Date.now();
+        userFrameCallback(frame, deps);
+        // @ts-ignore
+        await new Promise(resolve => canvas2D.requestAnimationFrame(resolve));
+        state.FPS = (1000 / (Date.now() - t)).toFixed(2)
+      }
+    });
+    deps = {
+      ctx,
+      inputCtx,
+      canvasGL,
+      canvas2D,
+      canvasInput,
+      cameraCtx,
+      frameAdapter,
+      cameraListener,
+    };
+    console.log('helper view inited');
+    await wx.hideLoading();
+  })
 })
 
-onUnmounted(() => {
 
+onUnmounted(() => {
+  if (state.usingCamera) deps?.cameraListener.stop();
+  // @ts-ignore
+  deps = null;
+  // @ts-ignore
+  userFrameCallback = null;
+})
+
+defineExpose({
+  drawCanvas2D,
+  set,
+  start,
+  stop
 })
 
 
 </script>
 <template>
-  <div id="ddd">3232323</div>
   <camera class="camera" frame-size="medium" device-position="front"></camera>
   <canvas class="gl" type="webgl" id="gl"></canvas>
   <canvas class="canvas" type="2d" id="canvas" :style="{
@@ -169,11 +172,15 @@ onUnmounted(() => {
   color: #425066;
 }
 
-.gl,
+.gl {
+  width: 0;
+  height: 0;
+}
+
 .camera,
 .canvas {
   width: 100vw;
-  height: 90vh;
+  height: 100vh;
   position: absolute;
   bottom: 0;
   left: 0;
