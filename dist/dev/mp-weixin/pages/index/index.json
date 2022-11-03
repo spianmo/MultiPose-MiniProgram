@@ -1,5 +1,8 @@
 {
-  "navigationBarTitleText": "uni-app",
+  "navigationBarTitleText": "TFLite",
+  "navigationStyle": "custom",
+  "disableScroll": true,
+  "navigationBarTextStyle": "white",
   "usingComponents": {
     "pose-camera": "./PoseCamera"
   }

@@ -1,0 +1,1 @@
+.tf-appbar{display:flex;width:100%;justify-content:center;align-items:center}.tf-btn{color:#fff;margin:10px;background-image:linear-gradient(to right,#ff6f00,#ff9100);padding:5px;text-align:center;border-radius:5px}

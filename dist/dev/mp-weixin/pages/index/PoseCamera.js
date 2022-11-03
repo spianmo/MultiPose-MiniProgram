@@ -71,7 +71,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
               frame.width,
               frame.height,
               windowWidth,
-              windowHeight * 0.9
+              windowHeight
             );
             state.canvas2DH = canvas2DH;
             state.canvas2DW = canvas2DW;
@@ -111,10 +111,7 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       stop
     });
     return (_ctx, _cache) => {
-      return {
-        a: `${state.canvas2DW}px`,
-        b: `${state.canvas2DH}px`
-      };
+      return {};
     };
   }
 });

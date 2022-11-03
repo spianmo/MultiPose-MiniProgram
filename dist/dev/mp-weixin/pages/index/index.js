@@ -63,6 +63,9 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
   __name: "index",
   setup(__props) {
     const helper = common_vendor.ref(null);
+    const state = common_vendor.reactive({
+      isDetect: false
+    });
     common_vendor.onReady(async () => {
       await common_vendor.ready();
       const model = await poseDetection_create_detector.createDetector(poseDetection_types.SupportedModels.MoveNet, { modelType: poseDetection_index.movenet.modelType.SINGLEPOSE_LIGHTNING });
@@ -88,11 +91,15 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
       };
       helper.value.set({ onFrame });
     });
-    const startCamera = () => {
-      common_vendor.unref(helper).start();
-    };
-    const stopCamera = () => {
-      common_vendor.unref(helper).stop();
+    const toggleDetect = () => {
+      console.log("\u8C03\u7528\u4E86");
+      if (!state.isDetect) {
+        common_vendor.unref(helper).start();
+        state.isDetect = true;
+      } else {
+        common_vendor.unref(helper).stop();
+        state.isDetect = false;
+      }
     };
     common_vendor.onShow(() => {
       console.log("onShow");
@@ -102,11 +109,11 @@ const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
     });
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(startCamera),
-        b: common_vendor.o(stopCamera),
-        c: common_vendor.sr(helper, "d36a244c-0", {
+        a: common_vendor.sr(helper, "d36a244c-0", {
           "k": "helper"
-        })
+        }),
+        b: common_vendor.t(state.isDetect ? "\u505C\u6B62\u8BC6\u522B" : "\u5F00\u59CB\u8BC6\u522B"),
+        c: common_vendor.o(toggleDetect)
       };
     };
   }

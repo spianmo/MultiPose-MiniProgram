@@ -33,6 +33,28 @@ function makeMap(str, expectsLowerCase) {
   }
   return expectsLowerCase ? (val) => !!map[val.toLowerCase()] : (val) => !!map[val];
 }
+const toDisplayString = (val) => {
+  return isString$1(val) ? val : val == null ? "" : isArray(val) || isObject(val) && (val.toString === objectToString || !isFunction$1(val.toString)) ? JSON.stringify(val, replacer, 2) : String(val);
+};
+const replacer = (_key, val) => {
+  if (val && val.__v_isRef) {
+    return replacer(_key, val.value);
+  } else if (isMap(val)) {
+    return {
+      [`Map(${val.size})`]: [...val.entries()].reduce((entries, [key, val2]) => {
+        entries[`${key} =>`] = val2;
+        return entries;
+      }, {})
+    };
+  } else if (isSet(val)) {
+    return {
+      [`Set(${val.size})`]: [...val.values()]
+    };
+  } else if (isObject(val) && !isArray(val) && !isPlainObject(val)) {
+    return String(val);
+  }
+  return val;
+};
 const EMPTY_OBJ = Object.freeze({});
 const EMPTY_ARR = Object.freeze([]);
 const NOOP = () => {
@@ -436,9 +458,9 @@ function assertType$1(value, type) {
   let valid;
   const expectedType = getType$1(type);
   if (isSimpleType$1(expectedType)) {
-    const t = typeof value;
-    valid = t === expectedType.toLowerCase();
-    if (!valid && t === "object") {
+    const t2 = typeof value;
+    valid = t2 === expectedType.toLowerCase();
+    if (!valid && t2 === "object") {
       valid = value instanceof type;
     }
   } else if (expectedType === "Object") {
@@ -3943,7 +3965,7 @@ function isSameType(a, b) {
 }
 function getTypeIndex(type, expectedTypes) {
   if (isArray(expectedTypes)) {
-    return expectedTypes.findIndex((t) => isSameType(t, type));
+    return expectedTypes.findIndex((t2) => isSameType(t2, type));
   } else if (isFunction$1(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1;
   }
@@ -3991,9 +4013,9 @@ function assertType(value, type) {
   let valid;
   const expectedType = getType(type);
   if (isSimpleType(expectedType)) {
-    const t = typeof value;
-    valid = t === expectedType.toLowerCase();
-    if (!valid && t === "object") {
+    const t2 = typeof value;
+    valid = t2 === expectedType.toLowerCase();
+    if (!valid && t2 === "object") {
       valid = value instanceof type;
     }
   } else if (expectedType === "Object") {
@@ -5206,6 +5228,7 @@ function setRef(ref2, id, opts = {}) {
   $templateRefs.push({ i: id, r: ref2, k: opts.k, f: opts.f });
 }
 const o = (value, key) => vOn(value, key);
+const t = (val) => toDisplayString(val);
 const sr$1 = (ref2, id, opts) => setRef(ref2, id, opts);
 function createApp$1(rootComponent, rootProps = null) {
   rootComponent && (rootComponent.mpType = "app");
@@ -6671,9 +6694,9 @@ class Environment {
 }
 function getQueryParams(queryString) {
   const params = {};
-  queryString.replace(/[?&]([^=?&]+)(?:=([^&]*))?/g, (s, ...t) => {
-    decodeParam(params, t[0], t[1]);
-    return t.join("=");
+  queryString.replace(/[?&]([^=?&]+)(?:=([^&]*))?/g, (s, ...t2) => {
+    decodeParam(params, t2[0], t2[1]);
+    return t2.join("=");
   });
   return params;
 }
@@ -9356,15 +9379,15 @@ class Engine {
       backendVals = values.map((d) => encodeString(d));
     }
     const dataId = backend2.write(backendVals, shape, dtype);
-    const t = new Tensor(shape, dtype, dataId, this.nextTensorId());
-    this.trackTensor(t, backend2);
+    const t2 = new Tensor(shape, dtype, dataId, this.nextTensorId());
+    this.trackTensor(t2, backend2);
     if (dtype === "string") {
       const info = this.state.tensorInfo.get(dataId);
       const newBytes = bytesFromStringArray(backendVals);
       this.state.numBytes += newBytes - info.bytes;
       info.bytes = newBytes;
     }
-    return t;
+    return t2;
   }
   makeTensorFromDataId(dataId, shape, dtype, backend2) {
     dtype = dtype || "float32";
@@ -9373,9 +9396,9 @@ class Engine {
   }
   makeTensorFromTensorInfo(tensorInfo, backend2) {
     const { dataId, shape, dtype } = tensorInfo;
-    const t = new Tensor(shape, dtype, dataId, this.nextTensorId());
-    this.trackTensor(t, backend2);
-    return t;
+    const t2 = new Tensor(shape, dtype, dataId, this.nextTensorId());
+    this.trackTensor(t2, backend2);
+    return t2;
   }
   makeVariable(initialValue, trainable = true, name, dtype) {
     name = name || this.nextVariableId().toString();
@@ -9534,7 +9557,7 @@ class Engine {
   }
   endScope(result) {
     const tensorsToTrackInParent = getTensorsInContainer(result);
-    const tensorsToTrackInParentSet = new Set(tensorsToTrackInParent.map((t) => t.id));
+    const tensorsToTrackInParentSet = new Set(tensorsToTrackInParent.map((t2) => t2.id));
     for (let i = 0; i < this.state.activeScope.track.length; i++) {
       const tensor2 = this.state.activeScope.track[i];
       if (!tensor2.kept && !tensorsToTrackInParentSet.has(tensor2.id)) {
@@ -9584,7 +9607,7 @@ class Engine {
   customGrad(f) {
     assert(isFunction(f), () => "The f passed in customGrad(f) must be a function.");
     return (...inputs) => {
-      assert(inputs.every((t) => t instanceof Tensor), () => "The args passed in customGrad(f)(x1, x2,...) must all be tensors");
+      assert(inputs.every((t2) => t2 instanceof Tensor), () => "The args passed in customGrad(f)(x1, x2,...) must all be tensors");
       let res;
       const inputMap = {};
       inputs.forEach((input, i) => {
@@ -9600,7 +9623,7 @@ class Engine {
         const gradRes = res.gradFunc(dy, saved);
         const grads2 = Array.isArray(gradRes) ? gradRes : [gradRes];
         assert(grads2.length === inputs.length, () => "The function f passed in customGrad(f) must return an object where `obj.gradFunc` is a function that returns the same number of tensors as inputs passed to f(...).");
-        assert(grads2.every((t) => t instanceof Tensor), () => "The function f passed in customGrad(f) must return an object where `obj.gradFunc` is a function that returns a list of only tensors.");
+        assert(grads2.every((t2) => t2 instanceof Tensor), () => "The function f passed in customGrad(f) must return an object where `obj.gradFunc` is a function that returns a list of only tensors.");
         const gradMap = {};
         grads2.forEach((grad2, i) => {
           gradMap[i] = () => grad2;
@@ -9849,7 +9872,7 @@ function convertToTensorArray(arg, argName, functionName, parseAsDtype = "numeri
     throw new Error(`Argument ${argName} passed to ${functionName} must be a \`Tensor[]\` or \`TensorLike[]\``);
   }
   const tensors = arg;
-  return tensors.map((t, i) => convertToTensor(t, `${argName}[${i}]`, functionName, parseAsDtype));
+  return tensors.map((t2, i) => convertToTensor(t2, `${argName}[${i}]`, functionName, parseAsDtype));
 }
 /**
  * @license
@@ -10032,14 +10055,14 @@ async function encodeWeights(tensors, group) {
   const names = Array.isArray(tensors) ? tensors.map((tensor2) => tensor2.name) : Object.keys(tensors);
   for (let i = 0; i < names.length; ++i) {
     const name = names[i];
-    const t = Array.isArray(tensors) ? tensors[i].tensor : tensors[name];
-    if (t.dtype !== "float32" && t.dtype !== "int32" && t.dtype !== "bool" && t.dtype !== "string" && t.dtype !== "complex64") {
-      throw new Error(`Unsupported dtype in weight '${name}': ${t.dtype}`);
+    const t2 = Array.isArray(tensors) ? tensors[i].tensor : tensors[name];
+    if (t2.dtype !== "float32" && t2.dtype !== "int32" && t2.dtype !== "bool" && t2.dtype !== "string" && t2.dtype !== "complex64") {
+      throw new Error(`Unsupported dtype in weight '${name}': ${t2.dtype}`);
     }
-    const spec = { name, shape: t.shape, dtype: t.dtype };
-    if (t.dtype === "string") {
+    const spec = { name, shape: t2.shape, dtype: t2.dtype };
+    if (t2.dtype === "string") {
       const utf8bytes = new Promise(async (resolve) => {
-        const vals = await t.bytes();
+        const vals = await t2.bytes();
         const totalNumBytes = vals.reduce((p, c) => p + c.length, 0) + NUM_BYTES_STRING_LENGTH * vals.length;
         const bytes = new Uint8Array(totalNumBytes);
         let offset = 0;
@@ -10055,7 +10078,7 @@ async function encodeWeights(tensors, group) {
       });
       dataPromises.push(utf8bytes);
     } else {
-      dataPromises.push(t.data());
+      dataPromises.push(t2.data());
     }
     if (group != null) {
       spec.group = group;
@@ -13343,15 +13366,15 @@ const acosh$1 = op({ acosh_ });
 function addN_(tensors) {
   assert(Array.isArray(tensors), () => "The argument passed to tf.addN() must be a list of tensors");
   assert(tensors.length >= 1, () => `Must pass at least one tensor to tf.addN(), but got ${tensors.length}`);
-  const $tensors = tensors.map((t, i) => convertToTensor(t, `tensors${i}`, "addN"));
+  const $tensors = tensors.map((t2, i) => convertToTensor(t2, `tensors${i}`, "addN"));
   const firstTensor = $tensors[0];
-  $tensors.forEach((t) => {
-    if (t.dtype !== firstTensor.dtype) {
+  $tensors.forEach((t2) => {
+    if (t2.dtype !== firstTensor.dtype) {
       throw new Error("All tensors passed to tf.addN() must have the same dtype");
     }
   });
-  $tensors.forEach((t) => {
-    if (!arraysEqual(t.shape, firstTensor.shape)) {
+  $tensors.forEach((t2) => {
+    if (!arraysEqual(t2.shape, firstTensor.shape)) {
       throw new Error("All tensors passed to tf.addN() must have the same shape");
     }
   });
@@ -15101,7 +15124,7 @@ const dot = op({ dot_ });
  * =============================================================================
  */
 function einsum_(equation, ...tensors) {
-  const $tensors = tensors.map((t, i) => convertToTensor(t, `tensors${i}`, "einsum"));
+  const $tensors = tensors.map((t2, i) => convertToTensor(t2, `tensors${i}`, "einsum"));
   const attrs = { equation };
   return ENGINE.runKernel(Einsum, $tensors, attrs);
 }
@@ -17066,7 +17089,7 @@ const prod$1 = op({ prod_ });
  * =============================================================================
  */
 function raggedGather_(paramsNestedSplits, paramsDenseValues, indices, outputRaggedRank) {
-  const $paramsNestedSplits = paramsNestedSplits.map((t, i) => convertToTensor(t, `tensors${i}`, "raggedGather", "int32"));
+  const $paramsNestedSplits = paramsNestedSplits.map((t2, i) => convertToTensor(t2, `tensors${i}`, "raggedGather", "int32"));
   const $paramsDenseValues = convertToTensor(paramsDenseValues, "paramsDenseValues", "raggedGather");
   const $indices = convertToTensor(indices, "indices", "raggedGather", "int32");
   const inputs = {
@@ -17102,7 +17125,7 @@ function raggedTensorToTensor_(shape, values, defaultValue, rowPartitionTensors,
   const $shape = convertToTensor(shape, "shape", "raggedTensorToTensor", "int32");
   const $values = convertToTensor(values, "values", "raggedTensorToTensor");
   const $defaultValue = convertToTensor(defaultValue, "defaultValue", "raggedTensorToTensor", $values.dtype);
-  const $rowPartitionTensors = rowPartitionTensors.map((t, i) => convertToTensor(t, `tensors${i}`, "raggedTensorToTensor", "int32"));
+  const $rowPartitionTensors = rowPartitionTensors.map((t2, i) => convertToTensor(t2, `tensors${i}`, "raggedTensorToTensor", "int32"));
   const inputs = {
     shape: $shape,
     values: $values,
@@ -17153,10 +17176,10 @@ var alea$1 = { exports: {} };
     function Alea(seed) {
       var me = this, mash = Mash();
       me.next = function() {
-        var t = 2091639 * me.s0 + me.c * 23283064365386963e-26;
+        var t2 = 2091639 * me.s0 + me.c * 23283064365386963e-26;
         me.s0 = me.s1;
         me.s1 = me.s2;
-        return me.s2 = t - (me.c = t | 0);
+        return me.s2 = t2 - (me.c = t2 | 0);
       };
       me.c = 1;
       me.s0 = mash(" ");
@@ -17176,12 +17199,12 @@ var alea$1 = { exports: {} };
       }
       mash = null;
     }
-    function copy(f, t) {
-      t.c = f.c;
-      t.s0 = f.s0;
-      t.s1 = f.s1;
-      t.s2 = f.s2;
-      return t;
+    function copy(f, t2) {
+      t2.c = f.c;
+      t2.s0 = f.s0;
+      t2.s1 = f.s1;
+      t2.s2 = f.s2;
+      return t2;
     }
     function impl(seed, opts) {
       var xg = new Alea(seed), state = opts && opts.state, prng = xg.next;
@@ -17244,11 +17267,11 @@ var xor128$1 = { exports: {} };
       me.z = 0;
       me.w = 0;
       me.next = function() {
-        var t = me.x ^ me.x << 11;
+        var t2 = me.x ^ me.x << 11;
         me.x = me.y;
         me.y = me.z;
         me.z = me.w;
-        return me.w ^= me.w >>> 19 ^ t ^ t >>> 8;
+        return me.w ^= me.w >>> 19 ^ t2 ^ t2 >>> 8;
       };
       if (seed === (seed | 0)) {
         me.x = seed;
@@ -17260,12 +17283,12 @@ var xor128$1 = { exports: {} };
         me.next();
       }
     }
-    function copy(f, t) {
-      t.x = f.x;
-      t.y = f.y;
-      t.z = f.z;
-      t.w = f.w;
-      return t;
+    function copy(f, t2) {
+      t2.x = f.x;
+      t2.y = f.y;
+      t2.z = f.z;
+      t2.w = f.w;
+      return t2;
     }
     function impl(seed, opts) {
       var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
@@ -17309,12 +17332,12 @@ var xorwow$1 = { exports: {} };
     function XorGen(seed) {
       var me = this, strseed = "";
       me.next = function() {
-        var t = me.x ^ me.x >>> 2;
+        var t2 = me.x ^ me.x >>> 2;
         me.x = me.y;
         me.y = me.z;
         me.z = me.w;
         me.w = me.v;
-        return (me.d = me.d + 362437 | 0) + (me.v = me.v ^ me.v << 4 ^ (t ^ t << 1)) | 0;
+        return (me.d = me.d + 362437 | 0) + (me.v = me.v ^ me.v << 4 ^ (t2 ^ t2 << 1)) | 0;
       };
       me.x = 0;
       me.y = 0;
@@ -17334,14 +17357,14 @@ var xorwow$1 = { exports: {} };
         me.next();
       }
     }
-    function copy(f, t) {
-      t.x = f.x;
-      t.y = f.y;
-      t.z = f.z;
-      t.w = f.w;
-      t.v = f.v;
-      t.d = f.d;
-      return t;
+    function copy(f, t2) {
+      t2.x = f.x;
+      t2.y = f.y;
+      t2.z = f.z;
+      t2.w = f.w;
+      t2.v = f.v;
+      t2.d = f.d;
+      return t2;
     }
     function impl(seed, opts) {
       var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
@@ -17385,19 +17408,19 @@ var xorshift7$1 = { exports: {} };
     function XorGen(seed) {
       var me = this;
       me.next = function() {
-        var X = me.x, i = me.i, t, v;
-        t = X[i];
-        t ^= t >>> 7;
-        v = t ^ t << 24;
-        t = X[i + 1 & 7];
-        v ^= t ^ t >>> 10;
-        t = X[i + 3 & 7];
-        v ^= t ^ t >>> 3;
-        t = X[i + 4 & 7];
-        v ^= t ^ t << 7;
-        t = X[i + 7 & 7];
-        t = t ^ t << 13;
-        v ^= t ^ t << 9;
+        var X = me.x, i = me.i, t2, v;
+        t2 = X[i];
+        t2 ^= t2 >>> 7;
+        v = t2 ^ t2 << 24;
+        t2 = X[i + 1 & 7];
+        v ^= t2 ^ t2 >>> 10;
+        t2 = X[i + 3 & 7];
+        v ^= t2 ^ t2 >>> 3;
+        t2 = X[i + 4 & 7];
+        v ^= t2 ^ t2 << 7;
+        t2 = X[i + 7 & 7];
+        t2 = t2 ^ t2 << 13;
+        v ^= t2 ^ t2 << 9;
         X[i] = v;
         me.i = i + 1 & 7;
         return v;
@@ -17428,10 +17451,10 @@ var xorshift7$1 = { exports: {} };
       }
       init(me, seed);
     }
-    function copy(f, t) {
-      t.x = f.x.slice();
-      t.i = f.i;
-      return t;
+    function copy(f, t2) {
+      t2.x = f.x.slice();
+      t2.i = f.i;
+      return t2;
     }
     function impl(seed, opts) {
       if (seed == null)
@@ -17477,20 +17500,20 @@ var xor4096$1 = { exports: {} };
     function XorGen(seed) {
       var me = this;
       me.next = function() {
-        var w = me.w, X = me.X, i = me.i, t, v;
+        var w = me.w, X = me.X, i = me.i, t2, v;
         me.w = w = w + 1640531527 | 0;
         v = X[i + 34 & 127];
-        t = X[i = i + 1 & 127];
+        t2 = X[i = i + 1 & 127];
         v ^= v << 13;
-        t ^= t << 17;
+        t2 ^= t2 << 17;
         v ^= v >>> 15;
-        t ^= t >>> 12;
-        v = X[i] = v ^ t;
+        t2 ^= t2 >>> 12;
+        v = X[i] = v ^ t2;
         me.i = i;
         return v + (w ^ w >>> 16) | 0;
       };
       function init(me2, seed2) {
-        var t, v, i, j, w, X = [], limit = 128;
+        var t2, v, i, j, w, X = [], limit = 128;
         if (seed2 === (seed2 | 0)) {
           v = seed2;
           seed2 = null;
@@ -17510,8 +17533,8 @@ var xor4096$1 = { exports: {} };
           v ^= v >>> 13;
           if (j >= 0) {
             w = w + 1640531527 | 0;
-            t = X[j & 127] ^= v + w;
-            i = 0 == t ? i + 1 : 0;
+            t2 = X[j & 127] ^= v + w;
+            i = 0 == t2 ? i + 1 : 0;
           }
         }
         if (i >= 128) {
@@ -17520,12 +17543,12 @@ var xor4096$1 = { exports: {} };
         i = 127;
         for (j = 4 * 128; j > 0; --j) {
           v = X[i + 34 & 127];
-          t = X[i = i + 1 & 127];
+          t2 = X[i = i + 1 & 127];
           v ^= v << 13;
-          t ^= t << 17;
+          t2 ^= t2 << 17;
           v ^= v >>> 15;
-          t ^= t >>> 12;
-          X[i] = v ^ t;
+          t2 ^= t2 >>> 12;
+          X[i] = v ^ t2;
         }
         me2.w = w;
         me2.X = X;
@@ -17533,11 +17556,11 @@ var xor4096$1 = { exports: {} };
       }
       init(me, seed);
     }
-    function copy(f, t) {
-      t.i = f.i;
-      t.w = f.w;
-      t.X = f.X.slice();
-      return t;
+    function copy(f, t2) {
+      t2.i = f.i;
+      t2.w = f.w;
+      t2.X = f.X.slice();
+      return t2;
     }
     function impl(seed, opts) {
       if (seed == null)
@@ -17608,12 +17631,12 @@ var tychei$1 = { exports: {} };
         me.next();
       }
     }
-    function copy(f, t) {
-      t.a = f.a;
-      t.b = f.b;
-      t.c = f.c;
-      t.d = f.d;
-      return t;
+    function copy(f, t2) {
+      t2.a = f.a;
+      t2.b = f.b;
+      t2.c = f.c;
+      t2.d = f.d;
+      return t2;
     }
     function impl(seed, opts) {
       var xg = new XorGen(seed), state = opts && opts.state, prng = function() {
@@ -17717,7 +17740,7 @@ const require$$0 = /* @__PURE__ */ getAugmentedNamespace(__viteBrowserExternal$1
       );
     }
     function ARC4(key) {
-      var t, keylen = key.length, me = this, i = 0, j = me.i = me.j = 0, s = me.S = [];
+      var t2, keylen = key.length, me = this, i = 0, j = me.i = me.j = 0, s = me.S = [];
       if (!keylen) {
         key = [keylen++];
       }
@@ -17725,25 +17748,25 @@ const require$$0 = /* @__PURE__ */ getAugmentedNamespace(__viteBrowserExternal$1
         s[i] = i++;
       }
       for (i = 0; i < width; i++) {
-        s[i] = s[j = mask & j + key[i % keylen] + (t = s[i])];
-        s[j] = t;
+        s[i] = s[j = mask & j + key[i % keylen] + (t2 = s[i])];
+        s[j] = t2;
       }
       (me.g = function(count) {
-        var t2, r = 0, i2 = me.i, j2 = me.j, s2 = me.S;
+        var t3, r = 0, i2 = me.i, j2 = me.j, s2 = me.S;
         while (count--) {
-          t2 = s2[i2 = mask & i2 + 1];
-          r = r * width + s2[mask & (s2[i2] = s2[j2 = mask & j2 + t2]) + (s2[j2] = t2)];
+          t3 = s2[i2 = mask & i2 + 1];
+          r = r * width + s2[mask & (s2[i2] = s2[j2 = mask & j2 + t3]) + (s2[j2] = t3)];
         }
         me.i = i2;
         me.j = j2;
         return r;
       })(width);
     }
-    function copy(f, t) {
-      t.i = f.i;
-      t.j = f.j;
-      t.S = f.S.slice();
-      return t;
+    function copy(f, t2) {
+      t2.i = f.i;
+      t2.j = f.j;
+      t2.S = f.S.slice();
+      return t2;
     }
     function flatten2(obj, depth) {
       var result = [], typ = typeof obj, prop;
@@ -31560,7 +31583,7 @@ class TensorArray {
     if (index2 < 0 || !this.dynamicSize && index2 >= this.maxSize) {
       throw new Error(`Tried to write to index ${index2}, but array is not resizeable and size is: ${this.maxSize}`);
     }
-    const t = this.tensors[index2] || {};
+    const t2 = this.tensors[index2] || {};
     if (tensor2.dtype !== this.dtype) {
       throw new Error(`TensorArray ${this.name}: Could not write to TensorArray index ${index2},
           because the value dtype is ${tensor2.dtype}, but TensorArray dtype is ${this.dtype}.`);
@@ -31569,16 +31592,16 @@ class TensorArray {
       this.elementShape = tensor2.shape;
     }
     assertShapesMatchAllowUndefinedSize(this.elementShape, tensor2.shape, `TensorArray ${this.name}: Could not write to TensorArray index ${index2}.`);
-    if (t.read) {
+    if (t2.read) {
       throw new Error(`TensorArray ${this.name}: Could not write to TensorArray index ${index2}, because it has already been read.`);
     }
-    if (t.written) {
+    if (t2.written) {
       throw new Error(`TensorArray ${this.name}: Could not write to TensorArray index ${index2}, because it has already been written.`);
     }
-    t.tensor = tensor2;
+    t2.tensor = tensor2;
     keep(tensor2);
-    t.written = true;
-    this.tensors[index2] = t;
+    t2.written = true;
+    this.tensors[index2] = t2;
   }
   writeMany(indices, tensors) {
     if (indices.length !== tensors.length) {
@@ -31826,7 +31849,7 @@ class TensorList {
       return tensor([], [0].concat(outputElementShape));
     }
     return tidy(() => {
-      const tensors = this.tensors.map((t) => reshape$1(t, outputElementShape));
+      const tensors = this.tensors.map((t2) => reshape$1(t2, outputElementShape));
       return concat$1(tensors, 0);
     });
   }
@@ -32572,14 +32595,14 @@ const executeOp$c = (node, tensorMap, context, ops = tfOps) => {
       return [cloneTensor(data2)];
     }
     case "IdentityN":
-      return getParamValue("x", node, tensorMap, context).map((t) => cloneTensor(t));
+      return getParamValue("x", node, tensorMap, context).map((t2) => cloneTensor(t2));
     case "Snapshot":
       const snapshot = getParamValue("x", node, tensorMap, context);
       return [cloneTensor(snapshot)];
     case "Shape":
       return [ops.tensor1d(getParamValue("x", node, tensorMap, context).shape, "int32")];
     case "ShapeN":
-      return getParamValue("x", node, tensorMap, context).map((t) => ops.tensor1d(t.shape));
+      return getParamValue("x", node, tensorMap, context).map((t2) => ops.tensor1d(t2.shape));
     case "Size":
       return [ops.scalar(getParamValue("x", node, tensorMap, context).size, "int32")];
     case "Rank":
@@ -33879,7 +33902,7 @@ class GraphExecutor {
     const context = new ExecutionContext(this.weightMap, tensorArrayMap, tensorListMap, this.functionExecutorMap);
     this.tensorsMap = await this.executeWithControlFlow(inputs, context, outputs, isFunctionExecution);
     const results = outputs.map((name) => getTensor(name, this.tensorsMap, context));
-    const outputIds = results.map((t) => t.id);
+    const outputIds = results.map((t2) => t2.id);
     const inputIds = Object.keys(inputs).map((name) => inputs[name].id);
     this.keepIds = /* @__PURE__ */ new Set([...outputIds, ...inputIds, ...this.weightIds]);
     if (!this.keepTensorForDebug) {
@@ -33956,12 +33979,12 @@ class GraphExecutor {
         }
         const currentContext = context.currentContext;
         if (isPromise(tensors)) {
-          promises.push(tensors.then((t) => {
-            tensorMap[nodeName] = t;
+          promises.push(tensors.then((t2) => {
+            tensorMap[nodeName] = t2;
             context.currentContext = currentContext;
             this.checkTensorForDisposal(nodeName, item.node, tensorMap, context, tensorsToKeep, outputNames, intermediateTensorConsumerCount);
             this.processChildNodes(item.node, stack2, context, tensorMap, added, usedNodes);
-            return t;
+            return t2;
           }));
         } else {
           tensorMap[nodeName] = tensors;
@@ -34948,9 +34971,9 @@ function assertNotComplex(tensor2, opName) {
   if (!Array.isArray(tensor2)) {
     tensor2 = [tensor2];
   }
-  tensor2.forEach((t) => {
-    if (t != null) {
-      assert(t.dtype !== "complex64", () => `${opName} does not support complex64 tensors in the WebGL backend.`);
+  tensor2.forEach((t2) => {
+    if (t2 != null) {
+      assert(t2.dtype !== "complex64", () => `${opName} does not support complex64 tensors in the WebGL backend.`);
     }
   });
 }
@@ -39036,14 +39059,14 @@ class RaggedTensorToTensorOp {
     }
     return Math.max(indexLength - firstEqualIndex, maxWidth);
   }
-  tensorShapeFromTensor(t, tShape, isPartial = true) {
+  tensorShapeFromTensor(t2, tShape, isPartial = true) {
     if (tShape.length === 0) {
-      if (t[0] === -1) {
+      if (t2[0] === -1) {
         return [];
       }
       throw new Error(`The only valid scalar shape tensor is the fully unknown shape specified as -1.`);
     }
-    return makeShape(t, isPartial);
+    return makeShape(t2, isPartial);
   }
   calculateOutputSize(firstDim) {
     const valueShape = this.valuesShape;
@@ -40108,25 +40131,25 @@ function select$1(array, k, left = 0, right = array.length - 1) {
       const newRight = Math.min(right, Math.floor(k + (n - i2) * s / n + sd));
       select$1(array, k, newLeft, newRight);
     }
-    const t = array[k];
+    const t2 = array[k];
     let i = left;
     let j = right;
     swap(array, left, k);
-    if (comparePair(array[right], t) > 0) {
+    if (comparePair(array[right], t2) > 0) {
       swap(array, left, right);
     }
     while (i < j) {
       swap(array, i, j);
       i++;
       j--;
-      while (comparePair(array[i], t) < 0) {
+      while (comparePair(array[i], t2) < 0) {
         i = i + 1;
       }
-      while (comparePair(array[j], t) > 0) {
+      while (comparePair(array[j], t2) > 0) {
         j = j - 1;
       }
     }
-    if (comparePair(array[left], t) === 0) {
+    if (comparePair(array[left], t2) === 0) {
       swap(array, left, j);
     } else {
       j = j + 1;
@@ -41170,17 +41193,17 @@ class MathBackendWebGL extends KernelBackend {
     const tmpData = this.texData.get(tmpTarget.dataId);
     return Object.assign({ tensorRef }, tmpData.texture);
   }
-  bufferSync(t) {
-    const data = this.readSync(t.dataId);
-    if (t.dtype === "string") {
+  bufferSync(t2) {
+    const data = this.readSync(t2.dataId);
+    if (t2.dtype === "string") {
       try {
         const strings = data.map((d) => decodeString(d));
-        return buffer(t.shape, t.dtype, strings);
+        return buffer(t2.shape, t2.dtype, strings);
       } catch (_a2) {
         throw new Error("Failed to decode encoded string bytes into utf-8");
       }
     }
-    return buffer(t.shape, t.dtype, data);
+    return buffer(t2.shape, t2.dtype, data);
   }
   checkNumericalProblems(values) {
     if (values == null) {
@@ -43358,8 +43381,8 @@ function addN(args) {
     const rightSide = addN({ inputs: tensors.slice(midIndex), backend: backend2 });
     return addN({ inputs: [leftSide, rightSide], backend: backend2 });
   }
-  const dtype = tensors.map((t) => t.dtype).reduce((d1, d2) => upcastType(d1, d2));
-  const shapes = tensors.map((t) => t.shape);
+  const dtype = tensors.map((t2) => t2.dtype).reduce((d1, d2) => upcastType(d1, d2));
+  const shapes = tensors.map((t2) => t2.shape);
   const usePackedOp = env().getBool("WEBGL_PACK");
   const program = usePackedOp ? new AddNPackedProgram(tensors[0].shape, shapes) : new AddNProgram(tensors[0].shape, shapes);
   return backend2.runWebGLProgram(program, tensors, dtype);
@@ -43716,7 +43739,7 @@ function argMinMaxReduce(backend2, x, axis, reduceType) {
     const reduced = argReduce(backend2, a2D, reduceType);
     intermediateTensorInfos.push(reduced);
     const reshaped = reshape({ inputs: { x: reduced }, backend: backend2, attrs: { shape: outShape } });
-    intermediateTensorInfos.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+    intermediateTensorInfos.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
     return reshaped;
   }
   return argReducePacked(backend2, x, reduceType);
@@ -43752,7 +43775,7 @@ function argMax(args) {
   }
   assertAxesAreInnerMostDims("argMax", [axes[0]], $x.shape.length);
   const out = argMinMaxReduce(backend2, $x, axes[0], "max");
-  intermediateTensorInfos.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  intermediateTensorInfos.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return out;
 }
 const argMaxConfig = {
@@ -43791,7 +43814,7 @@ function argMin(args) {
   }
   assertAxesAreInnerMostDims("argMin", [axes[0]], $x.shape.length);
   const out = argMinMaxReduce(backend2, $x, axes[0], "min");
-  intermediateTensorInfos.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  intermediateTensorInfos.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return out;
 }
 const argMinConfig = {
@@ -44919,8 +44942,8 @@ class SlicePackedProgram {
  */
 function shallowSlice(x, begin, size2, backend2) {
   const xTexData = backend2.texData.get(x.dataId);
-  const t = backend2.makeTensorInfo(size2, x.dtype);
-  const newTexData = backend2.texData.get(t.dataId);
+  const t2 = backend2.makeTensorInfo(size2, x.dtype);
+  const newTexData = backend2.texData.get(t2.dataId);
   Object.assign(newTexData, xTexData);
   newTexData.refCount = 1;
   newTexData.shape = size2;
@@ -44935,7 +44958,7 @@ function shallowSlice(x, begin, size2, backend2) {
   };
   const refCount = backend2.dataRefCount.get(newTexData.slice.origDataId) || 1;
   backend2.dataRefCount.set(newTexData.slice.origDataId, refCount + 1);
-  return t;
+  return t2;
 }
 function slice(args) {
   const { inputs, backend: backend2, attrs } = args;
@@ -45009,7 +45032,7 @@ const batchToSpaceND = (args) => {
   toDispose.push(reshapedIntermediate);
   toDispose.push(transposedIntermediate);
   toDispose.push(reshapedIntermediate2);
-  toDispose.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  toDispose.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return sliced;
 };
 const batchToSpaceNDConfig = {
@@ -45607,8 +45630,8 @@ const imagConfig = {
 function concatImpl(inputs, axis, backend2) {
   const dtype = inputs[0].dtype;
   if (dtype === "complex64") {
-    const reals = inputs.map((t) => real({ inputs: { input: t }, backend: backend2 }));
-    const imags = inputs.map((t) => imag({ inputs: { input: t }, backend: backend2 }));
+    const reals = inputs.map((t2) => real({ inputs: { input: t2 }, backend: backend2 }));
+    const imags = inputs.map((t2) => imag({ inputs: { input: t2 }, backend: backend2 }));
     const realConcated = concatImpl(reals, axis, backend2);
     const imagConcated = concatImpl(imags, axis, backend2);
     const result2 = complex({ inputs: { real: realConcated, imag: imagConcated }, backend: backend2 });
@@ -45623,20 +45646,20 @@ function concatImpl(inputs, axis, backend2) {
     runOnCpu = true;
   }
   if (runOnCpu) {
-    const tensors2D2 = inputs.map((t) => {
-      const innerSize = sizeFromShape(t.shape.slice(axis));
+    const tensors2D2 = inputs.map((t2) => {
+      const innerSize = sizeFromShape(t2.shape.slice(axis));
       const shape = [-1, innerSize];
-      return reshape({ inputs: { x: t }, backend: backend2, attrs: { shape } });
+      return reshape({ inputs: { x: t2 }, backend: backend2, attrs: { shape } });
     });
-    const inputsValShapes = tensors2D2.map((t) => {
-      return { vals: backend2.readSync(t.dataId), shape: t.shape };
+    const inputsValShapes = tensors2D2.map((t2) => {
+      return { vals: backend2.readSync(t2.dataId), shape: t2.shape };
     });
-    const outShape2 = computeOutShape$1(tensors2D2.map((t) => t.shape), 1);
+    const outShape2 = computeOutShape$1(tensors2D2.map((t2) => t2.shape), 1);
     const simplyConcat = tensors2D2[0].shape[0] === 1;
     const outVals = concatImplCPU(inputsValShapes, outShape2, dtype, simplyConcat);
-    const finalOutShape = computeOutShape$1(inputs.map((t) => t.shape), axis);
+    const finalOutShape = computeOutShape$1(inputs.map((t2) => t2.shape), axis);
     const outInfo = backend2.makeTensorInfo(finalOutShape, dtype, outVals);
-    tensors2D2.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+    tensors2D2.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
     return outInfo;
   }
   const maxTexturesInShader = env().getNumber("WEBGL_MAX_TEXTURES_IN_SHADER");
@@ -45653,11 +45676,11 @@ function concatImpl(inputs, axis, backend2) {
     return result2;
   }
   if (env().getBool("WEBGL_PACK_ARRAY_OPERATIONS") && inputs[0].shape.length > 1) {
-    const program2 = new ConcatPackedProgram(inputs.map((t) => t.shape), axis);
+    const program2 = new ConcatPackedProgram(inputs.map((t2) => t2.shape), axis);
     return backend2.runWebGLProgram(program2, inputs, dtype);
   }
   const { tensors2D, outShape } = computeTensors2D(inputs, axis, backend2);
-  const program = new ConcatProgram(tensors2D.map((t) => t.shape));
+  const program = new ConcatProgram(tensors2D.map((t2) => t2.shape));
   const result = backend2.runWebGLProgram(program, tensors2D, dtype);
   tensors2D.forEach((r) => backend2.disposeIntermediateTensorInfo(r));
   const reshapedResult = reshape({ inputs: { x: result }, attrs: { shape: outShape }, backend: backend2 });
@@ -45665,7 +45688,7 @@ function concatImpl(inputs, axis, backend2) {
   return reshapedResult;
 }
 function computeTensors2D(inputs, axis, backend2) {
-  const outShape = computeOutShape$1(inputs.map((t) => t.shape), axis);
+  const outShape = computeOutShape$1(inputs.map((t2) => t2.shape), axis);
   const tensors2D = inputs.map((x) => reshape({
     inputs: { x },
     attrs: { shape: [-1, sizeFromShape(x.shape.slice(axis))] },
@@ -45693,13 +45716,13 @@ function concat(args) {
   const { inputs, backend: backend2, attrs } = args;
   const { axis } = attrs;
   const $axis = parseAxisParam(axis, inputs[0].shape)[0];
-  const shapes = inputs.map((t) => t.shape);
+  const shapes = inputs.map((t2) => t2.shape);
   assertParamsConsistent(shapes, $axis);
-  const outShape = computeOutShape$1(inputs.map((t) => t.shape), $axis);
+  const outShape = computeOutShape$1(inputs.map((t2) => t2.shape), $axis);
   if (sizeFromShape(outShape) === 0) {
     return backend2.makeTensorInfo(outShape, inputs[0].dtype, []);
   }
-  const $inputs = inputs.filter((t) => sizeFromShape(t.shape) > 0);
+  const $inputs = inputs.filter((t2) => sizeFromShape(t2.shape) > 0);
   if ($inputs.length === 1) {
     return identity({ inputs: { x: $inputs[0] }, backend: backend2 });
   }
@@ -49335,7 +49358,7 @@ function fusedConv2d(args) {
   }
   const outReshaped = reshape({ inputs: { x: out }, backend: backend2, attrs: { shape: convInfo.outShape } });
   intermediates.push(out);
-  intermediates.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  intermediates.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return outReshaped;
 }
 const fusedConv2DConfig = {
@@ -49400,7 +49423,7 @@ function fusedDepthwiseConv2D(args) {
     [convInfo.inHeight, convInfo.inWidth]
   ];
   const result = backend2.runWebGLProgram(program, programInputs, "float32", customValues);
-  intermediates.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  intermediates.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return result;
 }
 const fusedDepthwiseConv2DConfig = {
@@ -49592,14 +49615,14 @@ function gatherV2(args) {
     const indicesBuf = backend2.bufferSync(flattenIndex);
     const xBuf = backend2.bufferSync(flattenX);
     const outBuf = gatherV2ImplCPU(xBuf, indicesBuf, flattenOutputShape);
-    toDispose.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+    toDispose.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
     return backend2.makeTensorInfo(shapeInfo.outputShape, outBuf.dtype, outBuf.values);
   }
   const program = new GatherProgram(flattenX.shape, flattenOutputShape);
   const res = backend2.runWebGLProgram(program, [flattenX, flattenIndex], flattenX.dtype);
   toDispose.push(res);
   const reshaped = reshape({ inputs: { x: res }, backend: backend2, attrs: { shape: shapeInfo.outputShape } });
-  toDispose.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  toDispose.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return reshaped;
 }
 const gatherV2Config = {
@@ -51708,18 +51731,18 @@ function pack(args) {
   }
   const shape = inputs[0].shape;
   const dtype = inputs[0].dtype;
-  inputs.forEach((t) => {
-    assertShapesMatch(shape, t.shape, "All tensors passed to stack must have matching shapes");
-    assert(dtype === t.dtype, () => "All tensors passed to stack must have matching dtypes");
+  inputs.forEach((t2) => {
+    assertShapesMatch(shape, t2.shape, "All tensors passed to stack must have matching shapes");
+    assert(dtype === t2.dtype, () => "All tensors passed to stack must have matching dtypes");
   });
   const intermediateTensorInfos = [];
-  const expandedTensors = inputs.map((t) => {
-    const expandedT = expandDims({ inputs: { input: t }, backend: backend2, attrs: { dim: axis } });
+  const expandedTensors = inputs.map((t2) => {
+    const expandedT = expandDims({ inputs: { input: t2 }, backend: backend2, attrs: { dim: axis } });
     intermediateTensorInfos.push(expandedT);
     return expandedT;
   });
   const result = concat({ inputs: expandedTensors, backend: backend2, attrs: { axis } });
-  intermediateTensorInfos.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  intermediateTensorInfos.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return result;
 }
 const packConfig = {
@@ -51994,7 +52017,7 @@ function prod(args) {
     const newShape = expandShapeToKeepDim(res.shape, origAxes);
     res = reshape({ inputs: { x: res }, backend: backend2, attrs: { shape: newShape } });
   }
-  toDispose.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  toDispose.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return res;
 }
 const prodConfig = {
@@ -52022,8 +52045,8 @@ function raggedGather(args) {
   const { inputs, backend: backend2, attrs } = args;
   const { paramsNestedSplits, paramsDenseValues, indices } = inputs;
   const { outputRaggedRank } = attrs;
-  const $paramsNestedSplits = paramsNestedSplits.map((t) => backend2.readSync(t.dataId));
-  const $paramsNestedSplitsShapes = paramsNestedSplits.map((t) => t.shape);
+  const $paramsNestedSplits = paramsNestedSplits.map((t2) => backend2.readSync(t2.dataId));
+  const $paramsNestedSplitsShapes = paramsNestedSplits.map((t2) => t2.shape);
   const $paramsDenseValues = backend2.readSync(paramsDenseValues.dataId);
   const $indices = backend2.readSync(indices.dataId);
   const [outputNestedSplits, outputDenseValues, outputDenseValuesShape] = raggedGatherImplCPU($paramsNestedSplits, $paramsNestedSplitsShapes, $paramsDenseValues, paramsDenseValues.shape, paramsDenseValues.dtype, $indices, indices.shape, outputRaggedRank);
@@ -52059,8 +52082,8 @@ function raggedTensorToTensor(args) {
   const $shape = backend2.readSync(shape.dataId);
   const $values = backend2.readSync(values.dataId);
   const $defaultValue = backend2.readSync(defaultValue.dataId);
-  const $rowPartitionValues = rowPartitionTensors.map((t) => backend2.readSync(t.dataId));
-  const rowPartitionValuesShapes = rowPartitionTensors.map((t) => t.shape);
+  const $rowPartitionValues = rowPartitionTensors.map((t2) => backend2.readSync(t2.dataId));
+  const rowPartitionValuesShapes = rowPartitionTensors.map((t2) => t2.shape);
   const [outputShape, output] = raggedTensorToTensorImplCPU($shape, shape.shape, $values, values.shape, values.dtype, $defaultValue, defaultValue.shape, $rowPartitionValues, rowPartitionValuesShapes, rowPartitionTypes);
   return backend2.makeTensorInfo(outputShape, values.dtype, output);
 }
@@ -53447,9 +53470,9 @@ class SelectProgram {
  */
 function select(args) {
   const { inputs, backend: backend2 } = args;
-  const { condition, t, e } = inputs;
-  const program = new SelectProgram(condition.shape.length, t.shape, t.shape.length);
-  return backend2.runWebGLProgram(program, [condition, t, e], upcastType(t.dtype, e.dtype));
+  const { condition, t: t2, e } = inputs;
+  const program = new SelectProgram(condition.shape.length, t2.shape, t2.shape.length);
+  return backend2.runWebGLProgram(program, [condition, t2, e], upcastType(t2.dtype, e.dtype));
 }
 const selectConfig = {
   kernelName: Select,
@@ -53691,7 +53714,7 @@ const spaceToBatchND = (args) => {
   toDispose.push(paddedX);
   toDispose.push(reshapedPaddedX);
   toDispose.push(paddedXT);
-  toDispose.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  toDispose.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return result;
 };
 const spaceToBatchNDConfig = {
@@ -54881,7 +54904,7 @@ function unpack(args) {
     res[i] = reshaped;
     toDispose.push(sliced);
   }
-  toDispose.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  toDispose.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return res;
 }
 const unpackConfig = {
@@ -55104,7 +55127,7 @@ function unsortedSegmentSum(args) {
     const perm = getUndoAxesPermutation(permutation);
     result = transpose({ inputs: { x: result }, backend: backend2, attrs: { perm } });
   }
-  toDispose.forEach((t) => backend2.disposeIntermediateTensorInfo(t));
+  toDispose.forEach((t2) => backend2.disposeIntermediateTensorInfo(t2));
   return result;
 }
 const unsortedSegmentSumConfig = {
@@ -55508,6 +55531,7 @@ exports.slice = slice$1;
 exports.squeeze = squeeze;
 exports.sr = sr$1;
 exports.sub = sub$1;
+exports.t = t;
 exports.tensor1d = tensor1d;
 exports.tensor2d = tensor2d;
 exports.textEncoder = textEncoder;

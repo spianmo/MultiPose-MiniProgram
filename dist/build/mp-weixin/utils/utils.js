@@ -1,0 +1,1 @@
+"use strict";const e={width:1,height:1,data:new Uint8Array([0,0,0,1])};exports.getNode=function(e,t){return new Promise((r=>{wx.createSelectorQuery().in(t).select(e).fields({node:!0,rect:!0,size:!0}).exec(r)}))},exports.objectFit=function(e,t,r,n){let o,i;const c=e/t;return r/n>c?(o=r,i=r/c):(o=n*c,i=n),[o,i]},exports.onePixel=e;

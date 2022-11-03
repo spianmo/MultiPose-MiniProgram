@@ -1,9 +1,16 @@
 <template>
-  <div class="tf-appbar">
-    <div @click="startCamera" class="tf-btn">开始识别</div>
-    <div @click="stopCamera" class="tf-btn">停止识别</div>
+  <div class="tf-container">
+    <div class="tf-content">
+      <PoseCamera ref="helper"/>
+    </div>
+    <div class="tf-appbar">
+    </div>
+    <div class="tf-footer">
+      <div @click="toggleDetect" class="tf-btn-round">
+        {{ state.isDetect ? '停止识别' : '开始识别' }}
+      </div>
+    </div>
   </div>
-  <PoseCamera ref="helper"/>
 </template>
 
 <script setup lang="ts">
@@ -13,11 +20,14 @@ import {createDetector, movenet, SupportedModels} from "../../pose-detection";
 import {Painter} from "../../utils/painter";
 import {Deps} from "./Deps";
 import PoseCamera from "./PoseCamera.vue";
-import {getCurrentInstance, nextTick, ref, unref} from "vue";
-import {getNode, onePixel} from "../../utils/utils";
+import {getCurrentInstance, reactive, ref, unref} from "vue";
+import {onePixel} from "../../utils/utils";
 
 const instance = getCurrentInstance()
 const helper = ref<any>(null)
+const state = reactive({
+  isDetect: false
+})
 
 onReady(async () => {
   await tf.ready()
@@ -53,37 +63,73 @@ onReady(async () => {
   helper.value.set({onFrame});
 })
 
-const startCamera = ()=>{
-  unref(helper).start()
+const toggleDetect = () => {
+  console.log("调用了")
+  if (!state.isDetect) {
+    unref(helper).start()
+    state.isDetect = true
+  } else {
+    unref(helper).stop()
+    state.isDetect = false
+  }
+
 }
 
-const stopCamera = () => {
-  unref(helper).stop();
-}
-
-onShow(()=>{
+onShow(() => {
   console.log("onShow")
 })
 
-onHide(()=>{
+onHide(() => {
   console.log("onHide")
 })
 
 </script>
 
-<style>
-.tf-appbar {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
+<style lang="scss">
+.tf-container {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+
+  .tf-appbar {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: 96px;
+    background-color: rgba(241, 241, 241, 0.4);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .tf-content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+
+  .tf-footer {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 0;
+
+    .tf-btn-round {
+      color: white;
+      margin: 10px 0 20px 0;
+      width: 80%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: linear-gradient(to right, #ff6f00, #ff9100);
+      padding: 5px;
+      height: 32px;
+      text-align: center;
+      border-radius: 25px;
+    }
+  }
 }
-.tf-btn {
-  color: white;
-  margin: 10px;
-  background-image: linear-gradient(to right, #ff6f00, #ff9100);
-  padding: 5px;
-  text-align: center;
-  border-radius: 5px;
-}
+
+
 </style>

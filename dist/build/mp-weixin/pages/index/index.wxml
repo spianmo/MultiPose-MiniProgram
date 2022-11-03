@@ -1,0 +1,1 @@
+<view class="tf-appbar"><view bindtap="{{a}}" class="tf-btn">开始识别</view><view bindtap="{{b}}" class="tf-btn">停止识别</view></view><pose-camera class="r" u-r="helper" u-i="d36a244c-0" bind:__l="__l"/>

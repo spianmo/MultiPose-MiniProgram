@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import * as tf from '@tensorflow/tfjs-core';
 import * as webgl from '@tensorflow/tfjs-backend-webgl';
-import {getCurrentInstance, nextTick, onMounted, onUnmounted, reactive} from "vue";
+import {defineExpose, getCurrentInstance, nextTick, onMounted, onUnmounted, reactive} from "vue";
 import {getNode, objectFit} from "../../utils/utils";
 import {setupWechatPlatform} from "../../tfjs-plugin/wechat_platform";
 import {fetchFunc} from "../../tfjs-plugin/fetch";
 import {Frame, FrameAdapter} from "../../utils/FrameAdapter";
 import {Deps} from "./Deps";
-import { defineExpose, ref  } from 'vue'
 
 // setWasmPaths(
 //     {
@@ -74,11 +73,11 @@ const stop = () => {
   deps.cameraListener.stop();
 }
 
-const set =  (cfg: {
-      onFrame: (frame: Frame, deps: any) => Promise<any> | void;
-    }) => {
-      userFrameCallback = cfg.onFrame;
-    }
+const set = (cfg: {
+  onFrame: (frame: Frame, deps: any) => Promise<any> | void;
+}) => {
+  userFrameCallback = cfg.onFrame;
+}
 
 onMounted(async () => {
   await wx.showLoading({title: '初始化中', mask: false});
@@ -107,7 +106,7 @@ onMounted(async () => {
             frame.width,
             frame.height,
             windowWidth,
-            windowHeight * 0.9,
+            windowHeight,
         );
         state.canvas2DH = canvas2DH
         state.canvas2DW = canvas2DW
@@ -155,38 +154,35 @@ defineExpose({
 
 </script>
 <template>
-  <camera class="camera" frame-size="medium" device-position="front"></camera>
-  <canvas class="gl" type="webgl" id="gl"></canvas>
-  <canvas class="canvas" type="2d" id="canvas" :style="{
-    width: `${state.canvas2DW}px`,
-    height: `${state.canvas2DH}px`
-  }"></canvas>
-  <canvas class="canvas canvas-input" type="2d" id="canvas-input"></canvas>
+  <div class="pose-camera">
+    <camera class="camera" frame-size="medium" device-position="front"/>
+    <canvas class="gl" type="webgl" id="gl"></canvas>
+    <canvas class="canvas" type="2d" id="canvas"></canvas>
+    <canvas class="canvas canvas-input" type="2d" id="canvas-input"></canvas>
+  </div>
 </template>
-<style>
-.page {
+<style lang="scss">
+.pose-camera {
   position: relative;
-  z-index: 0;
-  height: 100vh;
-  width: 100vw;
-  color: #425066;
+  height: 100%;
+  width: 100%;
+
+  .canvas {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
+
+  .camera {
+    display: none;
+  }
+
+  .gl {
+    display: none;
+  }
 }
 
-.gl {
-  width: 0;
-  height: 0;
-}
 
-.camera,
-.canvas {
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-}
-
-.canvas.canvas-input, .camera {
-  left: -100vw;
-}
 </style>
