@@ -1,1 +1,0 @@
-<camera class="camera" frame-size="medium" device-position="front"></camera><canvas class="gl" type="webgl" id="gl"></canvas><canvas class="canvas" type="2d" id="canvas" style="{{'width:' + a + ';' + ('height:' + b)}}"></canvas><canvas class="canvas canvas-input" type="2d" id="canvas-input"></canvas>

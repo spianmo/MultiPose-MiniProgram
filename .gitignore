@@ -1,2 +1,9 @@
-# Project exclude paths
-/node_modules/
+.hbuilderx
+node_modules
+
+.idea
+package-lock.json
+yarn.lock
+dist
+unpackage
+

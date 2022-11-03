@@ -1,1 +1,0 @@
-<view class="tf-container"><view class="tf-content"><pose-camera class="r" u-r="helper" u-i="607a84ee-0" bind:__l="__l"/></view><view class="tf-appbar"></view><view class="tf-footer"><view bindtap="{{c}}" class="tf-btn-round">{{b}}</view></view></view>
