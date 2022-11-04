@@ -20,17 +20,17 @@ export const DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_HEAVY =
     'http://oss.cache.ren/img/blazepose_3d/landmark/heavy/2/model.json';
 
 export const MOVENET_SINGLEPOSE_LIGHTNING_URL =
-    'http://oss.cache.ren/img/movenet/singlepose/lightning/4';
+    'http://oss.cache.ren/img/movenet/singlepose/lightning/4/model.json';
 export const MOVENET_SINGLEPOSE_THUNDER_URL =
-    'http://oss.cache.ren/img/movenet/singlepose/thunder/4';
+    'http://oss.cache.ren/img/movenet/singlepose/thunder/4/model.json';
 export const MOVENET_MULTIPOSE_LIGHTNING_URL =
-    'http://oss.cache.ren/img/movenet/multipose/lightning/1';
+    'http://oss.cache.ren/img/movenet/multipose/lightning/1/model.json';
 export const POSENET_URL =
     'http://oss.cache.ren/img/posenet/mobilenet/float/050/1/model-stride16.json';
 
 export const DETECT_CONFIG: any = {
     "PoseNet-MobileNetV1": {
-        model: SupportedModels.MoveNet,
+        model: SupportedModels.PoseNet,
         modelConfig: {
             architecture: 'MobileNetV1',
             outputStride: 16,

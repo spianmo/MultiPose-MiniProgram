@@ -18,15 +18,15 @@ import * as poseDetection from '@tensorflow-models/pose-detection';
 
 export class Painter {
   ctx!: CanvasRenderingContext2D;
-  canvas2D!: HTMLCanvasElement;
+  canvas!: HTMLCanvasElement;
   model!: poseDetection.SupportedModels;
 
   setCtx(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx
   }
 
-  setCanvas2D(canvas2D: HTMLCanvasElement) {
-    this.canvas2D = canvas2D
+  setCanvas(canvas: HTMLCanvasElement) {
+    this.canvas = canvas
   }
   /**
    * Draw the keypoints and skeleton on the video.
@@ -83,7 +83,7 @@ export class Painter {
 
     if (score >= scoreThreshold) {
       // @ts-ignored
-      const circle = this.canvas2D.createPath2D();
+      const circle = this.canvas.createPath2D();
       circle.arc(keypoint.x, keypoint.y, 4, 0, 2 * Math.PI);
       this.ctx.fill(circle);
       this.ctx.stroke(circle);

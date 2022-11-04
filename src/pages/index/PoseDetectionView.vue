@@ -4,14 +4,21 @@ import {createDetector} from "@tensorflow-models/pose-detection";
 import {Painter} from "../../utils/painter";
 import {Deps, DETECT_CONFIG, FpsCallback} from "./PoseDetectModel";
 import PoseCamera from "./PoseCamera.vue";
-import {computed, getCurrentInstance, onMounted, reactive, ref, unref} from "vue";
+import {computed, getCurrentInstance, onMounted, onUnmounted, reactive, ref, unref} from "vue";
 import {onePixel} from "../../utils/utils";
 import {PoseDetector} from "@tensorflow-models/pose-detection/dist/pose_detector";
 import {Frame} from "../../utils/FrameAdapter";
+import {clearRafInterval, setRafInterval} from "../../utils/raf-interval";
+import {Pose} from "@tensorflow-models/pose-detection/dist/types";
 
 const instance = getCurrentInstance()
 const poseCamera = ref<any>(null)
-let model: PoseDetector | null = null
+let model!: PoseDetector
+let intervalHandle = 0
+let lastPrediction!: Pose[]
+
+const painter = new Painter()
+
 const props = defineProps<{
   detectModel: 'MoveNet-SinglePose-Lightning' | 'MoveNet-SinglePose-Thunder' | 'BlazePose-Lite' | 'MobileNetV1',
   fpsCallback?: FpsCallback,
@@ -36,9 +43,16 @@ onMounted(async () => {
   console.log('model warm up', Date.now() - t)
   state.modelWarmFlag = true
 
+  intervalHandle = setRafInterval(() => {
+    if (!state.isDetect) return
+    painter.drawResults(lastPrediction);
+  }, 1000 / 60)
 })
 
-const painter = new Painter()
+onUnmounted(() => {
+  clearRafInterval(intervalHandle)
+})
+
 
 const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
   const {ctx, canvas2D} = poseDetectModel;
@@ -53,13 +67,12 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
   }
   const t = Date.now()
   // @ts-ignored
-  const prediction = await model.estimatePoses(video, {flipHorizontal: false})
+  lastPrediction = await model.estimatePoses(video, {flipHorizontal: false})
   console.log('predict cost', Date.now() - t)
 
   painter.setCtx(ctx);
   painter.setModel(state.currentDetectConfig.model);
-  painter.setCanvas2D(canvas2D);
-  painter.drawResults(prediction);
+  painter.setCanvas(canvas2D);
 }
 
 /**

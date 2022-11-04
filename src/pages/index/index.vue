@@ -18,7 +18,7 @@ const state: any = reactive({
 <template>
   <div class="tf-container">
     <div class="tf-content">
-      <PoseDetectionView ref="poseDetectionView" detect-model="BlazePose-Lite" camera-position="front"/>
+      <PoseDetectionView ref="poseDetectionView" detect-model="MoveNet-SinglePose-Lightning" camera-position="back"/>
     </div>
     <div :style="{
       paddingTop: `${state.statusBarHeight}px`,
