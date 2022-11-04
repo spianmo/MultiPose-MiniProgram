@@ -1,7 +1,3 @@
-import SelectorQuery = WechatMiniprogram.SelectorQuery;
-import TrivialInstance = WechatMiniprogram.Page.TrivialInstance;
-
-
 export function getNode(
     id: string,
     ctx: any,

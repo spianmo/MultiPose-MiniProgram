@@ -49,6 +49,7 @@
     "@dcloudio/uni-mp-weixin": "3.0.0-alpha-3060720221018006",
     "@dcloudio/uni-quickapp-webview": "3.0.0-alpha-3060720221018006",
     "@mediapipe/pose": "^0.5.1635988162",
+    "@tensorflow-models/pose-detection": "^2.0.0",
     "@tensorflow/tfjs-backend-wasm": "^4.0.0",
     "@tensorflow/tfjs-backend-webgl": "^4.0.0",
     "@tensorflow/tfjs-converter": "^4.0.0",

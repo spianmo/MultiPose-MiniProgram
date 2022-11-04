@@ -16,9 +16,14 @@
 <script setup lang="ts">
 import * as tf from '@tensorflow/tfjs-core';
 import {onHide, onReady, onShow} from "@dcloudio/uni-app";
-import {createDetector, movenet, SupportedModels} from "../../pose-detection";
+import {createDetector, movenet, SupportedModels} from "@tensorflow-models/pose-detection";
 import {Painter} from "../../utils/painter";
-import {Deps} from "./Deps";
+import {
+  DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
+  DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE,
+  Deps,
+  MOVENET_SINGLEPOSE_LIGHTNING_URL, MOVENET_SINGLEPOSE_THUNDER_URL
+} from "./Deps";
 import PoseCamera from "./PoseCamera.vue";
 import {computed, getCurrentInstance, reactive, ref, unref} from "vue";
 import {onePixel} from "../../utils/utils";
@@ -35,15 +40,25 @@ const state: any = reactive({
 let detectConfig: any = {
   "MoveNet-SinglePose-Lightning": {
     model: SupportedModels.MoveNet,
-    modelConfig: {modelType: movenet.modelType.SINGLEPOSE_LIGHTNING}
+    modelConfig: {
+      modelType: movenet.modelType.SINGLEPOSE_LIGHTNING,
+      modelUrl: MOVENET_SINGLEPOSE_LIGHTNING_URL
+    }
   },
   "MoveNet-SinglePose-Thunder": {
     model: SupportedModels.MoveNet,
-    modelConfig: {modelType: movenet.modelType.SINGLEPOSE_THUNDER}
+    modelConfig: {modelType: movenet.modelType.SINGLEPOSE_THUNDER},
+    modelUrl: MOVENET_SINGLEPOSE_THUNDER_URL
   },
   "BlazePose-Lite": {
     model: SupportedModels.BlazePose,
-    modelConfig: {runtime: 'tfjs', modelType: 'lite', enableSmoothing: true}
+    modelConfig: {
+      runtime: 'tfjs',
+      modelType: 'lite',
+      enableSmoothing: true,
+      detectorModelUrl: DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
+      landmarkModelUrl: DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE
+    }
   }
 }
 

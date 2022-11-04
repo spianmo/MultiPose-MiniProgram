@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as poseDetection from '../pose-detection';
+import * as poseDetection from '@tensorflow-models/pose-detection';
 
 export class Painter {
   ctx!: CanvasRenderingContext2D;
