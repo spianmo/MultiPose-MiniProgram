@@ -16,28 +16,47 @@
 <script setup lang="ts">
 import * as tf from '@tensorflow/tfjs-core';
 import {onHide, onReady, onShow} from "@dcloudio/uni-app";
-import {BlazePoseModelType, createDetector, movenet, SupportedModels} from "../../pose-detection";
+import {createDetector, movenet, SupportedModels} from "../../pose-detection";
 import {Painter} from "../../utils/painter";
 import {Deps} from "./Deps";
 import PoseCamera from "./PoseCamera.vue";
-import {getCurrentInstance, reactive, ref, unref} from "vue";
+import {computed, getCurrentInstance, reactive, ref, unref} from "vue";
 import {onePixel} from "../../utils/utils";
 
 const instance = getCurrentInstance()
 const helper = ref<any>(null)
-const state = reactive({
-  isDetect: false
+const state: any = reactive({
+  isDetect: false,
+  currentDetectModel: "BlazePose-Lite",
+  currentDetectConfig: computed(()=>detectConfig[state.currentDetectModel]),
+  modelWarmFlag: false
 })
+
+let detectConfig: any = {
+  "MoveNet-SinglePose-Lightning": {
+    model: SupportedModels.MoveNet,
+    modelConfig: {modelType: movenet.modelType.SINGLEPOSE_LIGHTNING}
+  },
+  "MoveNet-SinglePose-Thunder": {
+    model: SupportedModels.MoveNet,
+    modelConfig: {modelType: movenet.modelType.SINGLEPOSE_THUNDER}
+  },
+  "BlazePose-Lite": {
+    model: SupportedModels.BlazePose,
+    modelConfig: {runtime: 'tfjs', modelType: 'lite', enableSmoothing: true}
+  }
+}
 
 onReady(async () => {
   await tf.ready()
-  const model = await createDetector(SupportedModels.MoveNet, {modelType: movenet.modelType.SINGLEPOSE_THUNDER})
+  const model = await createDetector(state.currentDetectConfig.model, state.currentDetectConfig.modelConfig)
   console.log('movenet load end')
   const t = Date.now()
 
   // @ts-ignored
   await model.estimatePoses(onePixel, {flipHorizontal: false})
   console.log('movenet warm up', Date.now() - t)
+  state.modelWarmFlag = true
   const painter = new Painter()
 
   const onFrame = async (frame: { width: any; height: any; data: Iterable<number>; }, deps: Deps) => {
@@ -56,7 +75,7 @@ onReady(async () => {
     console.log('predict cost', Date.now() - t)
 
     painter.setCtx(ctx);
-    painter.setModel(SupportedModels.MoveNet);
+    painter.setModel(state.currentDetectConfig.model);
     painter.setCanvas2D(canvas2D);
     painter.drawResults(prediction);
   }
@@ -65,6 +84,10 @@ onReady(async () => {
 })
 
 const toggleDetect = () => {
+  if (!state.modelWarmFlag) {
+    uni.showToast({title: '模型热身中', icon: "loading"})
+    return
+  }
   if (!state.isDetect) {
     unref(helper).start()
     state.isDetect = true

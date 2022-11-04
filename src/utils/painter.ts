@@ -65,12 +65,12 @@ export class Painter {
       this.drawKeypoint(keypoints[i]);
     }
 
-    this.ctx.fillStyle = 'Green';
+    this.ctx.fillStyle = '#0ad4ea';
     for (const i of keypointInd.left) {
       this.drawKeypoint(keypoints[i]);
     }
 
-    this.ctx.fillStyle = 'Orange';
+    this.ctx.fillStyle = '#ffbd29';
     for (const i of keypointInd.right) {
       this.drawKeypoint(keypoints[i]);
     }

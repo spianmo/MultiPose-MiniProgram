@@ -8,7 +8,6 @@ import {fetchFunc} from "../../tfjs-plugin/fetch";
 import {Frame, FrameAdapter} from "../../utils/FrameAdapter";
 import {Deps} from "./Deps";
 
-
 setupWechatPlatform({
   fetchFunc,
   tf,
@@ -35,6 +34,7 @@ const state: {
   switchingBackend: boolean,
   canvas2DW: number,
   canvas2DH: number,
+  isDetect: boolean
 } = reactive({
   FPS: '0',
   backend: '',
@@ -43,7 +43,16 @@ const state: {
   switchingBackend: false,
   canvas2DW: 0,
   canvas2DH: 0,
+  isDetect: false
 })
+
+let screenSize: {
+  width: number,
+  height: number
+} = {
+  width: 0,
+  height: 0
+}
 
 
 const drawCanvas2D = (frame: Frame) => {
@@ -60,9 +69,15 @@ const drawCanvas2D = (frame: Frame) => {
 }
 const start = () => {
   deps.cameraListener.start();
+  state.canvas2DH = screenSize.height
+  state.canvas2DW = screenSize.width
+  state.isDetect = true
 }
 const stop = () => {
   deps.cameraListener.stop();
+  state.canvas2DH = 0
+  state.canvas2DW = 0
+  state.isDetect = false
 }
 
 const set = (cfg: {
@@ -97,6 +112,10 @@ onMounted(async () => {
             windowWidth,
             windowHeight,
         );
+        screenSize = {
+          width: canvas2DW,
+          height: canvas2DH
+        }
         state.canvas2DH = canvas2DH
         state.canvas2DW = canvas2DW
         canvasSizeInited = true;
@@ -141,12 +160,11 @@ defineExpose({
 </script>
 <template>
   <div class="pose-camera">
-    <camera class="camera" frame-size="medium" resolution="medium" device-position="back"/>
+    <camera class="camera" frame-size="medium" device-position="back"/>
     <canvas class="canvas" type="2d" id="canvas" :style="{
       width: `${state.canvas2DW}px`,
       height: `${state.canvas2DH}px`
     }"></canvas>
-    <canvas class="canvas canvas-input" type="2d" id="canvas-input"></canvas>
   </div>
 </template>
 <style lang="scss">
@@ -159,14 +177,12 @@ defineExpose({
     width: 100vw;
     height: 100vh;
     position: absolute;
-    bottom: 0;
-    left: 0;
   }
 
   .camera {
-    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
   }
 }
-
-
 </style>
