@@ -1,4 +1,4 @@
-import {Frame, FrameAdapter} from "../../utils/FrameAdapter";
+import {Frame, FrameAdapter} from "../utils/FrameAdapter";
 import {movenet, SupportedModels} from "@tensorflow-models/pose-detection";
 
 let poseDetectModel: {
@@ -34,8 +34,8 @@ export const DETECT_CONFIG: any = {
         modelConfig: {
             architecture: 'MobileNetV1',
             outputStride: 16,
-            inputResolution: 193,
-            multiplier: 0.5,
+            inputResolution: { width: 640, height: 480 },
+            multiplier: 0.75,
             modelUrl: POSENET_URL
         }
     },

@@ -2,10 +2,10 @@
 import * as tf from '@tensorflow/tfjs-core';
 import * as webgl from '@tensorflow/tfjs-backend-webgl';
 import {defineExpose, getCurrentInstance, nextTick, onMounted, onUnmounted, reactive} from "vue";
-import {getNode, objectFit} from "../../utils/utils";
-import {setupWechatPlatform} from "../../tfjs-plugin/wechat_platform";
-import {fetchFunc} from "../../tfjs-plugin/fetch";
-import {Frame, FrameAdapter} from "../../utils/FrameAdapter";
+import {getNode, objectFit} from "../utils/utils";
+import {setupWechatPlatform} from "../tfjs-plugin/wechat_platform";
+import {fetchFunc} from "../tfjs-plugin/fetch";
+import {Frame, FrameAdapter} from "../utils/FrameAdapter";
 import {Deps, FpsCallback, FrameCallback} from "./PoseDetectModel";
 
 setupWechatPlatform({
@@ -71,6 +71,7 @@ const drawCanvas2D = (frame: Frame) => {
   );
   poseDetectModel.ctx.putImageData(imageData, 0, 0);
 }
+
 const start = () => {
   poseDetectModel.cameraListener.start();
   state.canvas2DH = screenSize.height

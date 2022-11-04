@@ -1,26 +1,26 @@
 <script setup lang="ts">
 import * as tf from '@tensorflow/tfjs-core';
 import {createDetector} from "@tensorflow-models/pose-detection";
-import {Painter} from "../../utils/painter";
+import {Painter} from "../utils/painter";
 import {Deps, DETECT_CONFIG, FpsCallback} from "./PoseDetectModel";
 import PoseCamera from "./PoseCamera.vue";
 import {computed, getCurrentInstance, onMounted, onUnmounted, reactive, ref, unref} from "vue";
-import {onePixel} from "../../utils/utils";
+import {onePixel} from "../utils/utils";
 import {PoseDetector} from "@tensorflow-models/pose-detection/dist/pose_detector";
-import {Frame} from "../../utils/FrameAdapter";
-import {clearRafInterval, setRafInterval} from "../../utils/raf-interval";
+import {Frame} from "../utils/FrameAdapter";
+import {clearRafInterval, setRafInterval} from "../utils/raf-interval";
 import {Pose} from "@tensorflow-models/pose-detection/dist/types";
 
-const instance = getCurrentInstance()
 const poseCamera = ref<any>(null)
 let model!: PoseDetector
 let intervalHandle = 0
 let lastPrediction!: Pose[]
+let lastCameraFrame!: Frame
 
 const painter = new Painter()
 
 const props = defineProps<{
-  detectModel: 'MoveNet-SinglePose-Lightning' | 'MoveNet-SinglePose-Thunder' | 'BlazePose-Lite' | 'MobileNetV1',
+  detectModel: 'MoveNet-SinglePose-Lightning' | 'MoveNet-SinglePose-Thunder' | 'BlazePose-Lite' | 'PoseNet-MobileNetV1',
   fpsCallback?: FpsCallback,
   cameraPosition: 'back' | 'front'
 }>()
@@ -45,6 +45,7 @@ onMounted(async () => {
 
   intervalHandle = setRafInterval(() => {
     if (!state.isDetect) return
+    unref(poseCamera).drawCanvas2D(lastCameraFrame);
     painter.drawResults(lastPrediction);
   }, 1000 / 60)
 })
@@ -61,7 +62,7 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
     height: frame.height,
     data: new Uint8Array(frame.data),
   }
-  unref(poseCamera).drawCanvas2D(frame);
+  lastCameraFrame = frame
   if (!model) {
     return
   }

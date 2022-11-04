@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed, reactive, ref, unref} from "vue";
-import PoseDetectionView from "./PoseDetectionView.vue";
+import PoseDetectionView from "../../components/PoseDetectionView.vue";
 
 const statusBarHeight = wx.getSystemInfoSync().statusBarHeight;
 const menuButtonLayoutInfo = wx.getMenuButtonBoundingClientRect();
