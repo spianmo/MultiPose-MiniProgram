@@ -31,7 +31,7 @@ const state = reactive({
 
 onReady(async () => {
   await tf.ready()
-  const model = await createDetector(SupportedModels.BlazePose, {runtime: 'tfjs', modelType: 'lite', enableSmoothing: false})
+  const model = await createDetector(SupportedModels.MoveNet, {modelType: movenet.modelType.SINGLEPOSE_THUNDER})
   console.log('movenet load end')
   const t = Date.now()
 
@@ -56,7 +56,7 @@ onReady(async () => {
     console.log('predict cost', Date.now() - t)
 
     painter.setCtx(ctx);
-    painter.setModel(SupportedModels.BlazePose);
+    painter.setModel(SupportedModels.MoveNet);
     painter.setCanvas2D(canvas2D);
     painter.drawResults(prediction);
   }
