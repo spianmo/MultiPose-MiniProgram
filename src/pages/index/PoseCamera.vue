@@ -6,7 +6,7 @@ import {getNode, objectFit} from "../../utils/utils";
 import {setupWechatPlatform} from "../../tfjs-plugin/wechat_platform";
 import {fetchFunc} from "../../tfjs-plugin/fetch";
 import {Frame, FrameAdapter} from "../../utils/FrameAdapter";
-import {Deps} from "./Deps";
+import {Deps, FpsCallback, FrameCallback} from "./PoseDetectModel";
 
 setupWechatPlatform({
   fetchFunc,
@@ -18,13 +18,17 @@ setupWechatPlatform({
 
 tf.enableProdMode()
 
-let userFrameCallback: (frame: Frame, deps: any) => Promise<any> | void;
-
 const {windowWidth, windowHeight} = wx.getSystemInfoSync()
 
 const instance = getCurrentInstance()
 
-let deps: Deps
+let poseDetectModel: Deps
+
+const props = defineProps<{
+  fpsCallback?: FpsCallback,
+  frameCallback?: FrameCallback,
+  cameraPosition: 'back' | 'front'
+}>()
 
 const state: {
   FPS: string,
@@ -56,34 +60,28 @@ let screenSize: {
 
 
 const drawCanvas2D = (frame: Frame) => {
-  deps.ctx.clearRect(0, 0, deps.canvas2D.width, deps.canvas2D.height);
-  deps.canvas2D.width = frame.width;
-  deps.canvas2D.height = frame.height;
+  poseDetectModel.ctx.clearRect(0, 0, poseDetectModel.canvas2D.width, poseDetectModel.canvas2D.height);
+  poseDetectModel.canvas2D.width = frame.width;
+  poseDetectModel.canvas2D.height = frame.height;
   // @ts-ignore
-  const imageData = deps.canvas2D.createImageData(
+  const imageData = poseDetectModel.canvas2D.createImageData(
       new Uint8Array(frame.data),
       frame.width,
       frame.height,
   );
-  deps.ctx.putImageData(imageData, 0, 0);
+  poseDetectModel.ctx.putImageData(imageData, 0, 0);
 }
 const start = () => {
-  deps.cameraListener.start();
+  poseDetectModel.cameraListener.start();
   state.canvas2DH = screenSize.height
   state.canvas2DW = screenSize.width
   state.isDetect = true
 }
 const stop = () => {
-  deps.cameraListener.stop();
+  poseDetectModel.cameraListener.stop();
   state.canvas2DH = 0
   state.canvas2DW = 0
   state.isDetect = false
-}
-
-const set = (cfg: {
-  onFrame: (frame: Frame, deps: any) => Promise<any> | void;
-}) => {
-  userFrameCallback = cfg.onFrame;
 }
 
 onMounted(async () => {
@@ -104,7 +102,7 @@ onMounted(async () => {
     );
     let canvasSizeInited = false;
 
-    frameAdapter.onProcessFrame(async frame => {
+    frameAdapter.onProcessFrame(async (frame:Frame) => {
       if (!canvasSizeInited) {
         const [canvas2DW, canvas2DH] = objectFit(
             frame.width,
@@ -120,15 +118,18 @@ onMounted(async () => {
         state.canvas2DW = canvas2DW
         canvasSizeInited = true;
       }
-      if (userFrameCallback && !state.switchingBackend) {
+      if (props.frameCallback && !state.switchingBackend) {
         const t = Date.now();
-        userFrameCallback(frame, deps);
+        props.frameCallback(frame, poseDetectModel);
         // @ts-ignore
         await new Promise(resolve => canvas2D.requestAnimationFrame(resolve));
         state.FPS = (1000 / (Date.now() - t)).toFixed(2)
+        if (props.fpsCallback) {
+          props.fpsCallback(state.FPS)
+        }
       }
     });
-    deps = {
+    poseDetectModel = {
       ctx,
       canvas2D,
       cameraCtx,
@@ -142,25 +143,21 @@ onMounted(async () => {
 
 
 onUnmounted(() => {
-  if (state.usingCamera) deps?.cameraListener.stop();
+  if (state.usingCamera) poseDetectModel?.cameraListener.stop();
   // @ts-ignore
-  deps = null;
-  // @ts-ignore
-  userFrameCallback = null;
+  poseDetectModel = null;
 })
 
 defineExpose({
   drawCanvas2D,
-  set,
   start,
   stop
 })
 
-
 </script>
 <template>
   <div class="pose-camera">
-    <camera class="camera" frame-size="medium" device-position="back" />
+    <camera class="camera" frame-size="medium" :device-position="cameraPosition" />
     <canvas class="canvas" type="2d" id="canvas" :style="{
       width: `${state.canvas2DW}px`,
       height: `${state.canvas2DH}px`
@@ -170,19 +167,23 @@ defineExpose({
 <style lang="scss">
 .pose-camera {
   position: relative;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
 
   .canvas {
     width: 100vw;
     height: 100vh;
     position: absolute;
+    bottom: 0;
+    left: 0;
   }
 
   .camera {
     width: 100vw;
     height: 100vh;
     position: absolute;
+    bottom: 0;
+    left: 0;
   }
 }
 </style>

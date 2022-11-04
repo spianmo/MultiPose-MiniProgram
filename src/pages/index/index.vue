@@ -1,9 +1,29 @@
+<script setup lang="ts">
+import {computed, reactive, ref, unref} from "vue";
+import PoseDetectionView from "./PoseDetectionView.vue";
+
+const statusBarHeight = wx.getSystemInfoSync().statusBarHeight;
+const menuButtonLayoutInfo = wx.getMenuButtonBoundingClientRect();
+const poseDetectionView = ref<any>(null)
+
+const toggleDetect = () => unref(poseDetectionView)?.toggleDetect()
+
+const state: any = reactive({
+  statusBarHeight: computed(() => statusBarHeight),
+  toolbarHeight: computed(() => (menuButtonLayoutInfo.height + (menuButtonLayoutInfo.top - statusBarHeight) * 2)),
+  isDetect: computed(() => unref(poseDetectionView)?.getDetectStatus())
+})
+
+</script>
 <template>
   <div class="tf-container">
     <div class="tf-content">
-      <PoseCamera ref="helper"/>
+      <PoseDetectionView ref="poseDetectionView" detect-model="BlazePose-Lite" camera-position="front"/>
     </div>
-    <div class="tf-appbar">
+    <div :style="{
+      paddingTop: `${state.statusBarHeight}px`,
+      height: `${state.toolbarHeight}px`
+    }" class="tf-appbar">
     </div>
     <div class="tf-footer">
       <div @click="toggleDetect" class="tf-btn-round">
@@ -12,117 +32,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import * as tf from '@tensorflow/tfjs-core';
-import {onHide, onReady, onShow} from "@dcloudio/uni-app";
-import {createDetector, movenet, SupportedModels} from "@tensorflow-models/pose-detection";
-import {Painter} from "../../utils/painter";
-import {
-  DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
-  DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE,
-  Deps,
-  MOVENET_SINGLEPOSE_LIGHTNING_URL, MOVENET_SINGLEPOSE_THUNDER_URL
-} from "./Deps";
-import PoseCamera from "./PoseCamera.vue";
-import {computed, getCurrentInstance, reactive, ref, unref} from "vue";
-import {onePixel} from "../../utils/utils";
-
-const instance = getCurrentInstance()
-const helper = ref<any>(null)
-const state: any = reactive({
-  isDetect: false,
-  currentDetectModel: "BlazePose-Lite",
-  currentDetectConfig: computed(()=>detectConfig[state.currentDetectModel]),
-  modelWarmFlag: false
-})
-
-let detectConfig: any = {
-  "MoveNet-SinglePose-Lightning": {
-    model: SupportedModels.MoveNet,
-    modelConfig: {
-      modelType: movenet.modelType.SINGLEPOSE_LIGHTNING,
-      modelUrl: MOVENET_SINGLEPOSE_LIGHTNING_URL
-    }
-  },
-  "MoveNet-SinglePose-Thunder": {
-    model: SupportedModels.MoveNet,
-    modelConfig: {modelType: movenet.modelType.SINGLEPOSE_THUNDER},
-    modelUrl: MOVENET_SINGLEPOSE_THUNDER_URL
-  },
-  "BlazePose-Lite": {
-    model: SupportedModels.BlazePose,
-    modelConfig: {
-      runtime: 'tfjs',
-      modelType: 'lite',
-      enableSmoothing: true,
-      detectorModelUrl: DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
-      landmarkModelUrl: DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE
-    }
-  }
-}
-
-onReady(async () => {
-  await tf.ready()
-  const model = await createDetector(state.currentDetectConfig.model, state.currentDetectConfig.modelConfig)
-  console.log('movenet load end')
-  const t = Date.now()
-
-  // @ts-ignored
-  await model.estimatePoses(onePixel, {flipHorizontal: false})
-  console.log('movenet warm up', Date.now() - t)
-  state.modelWarmFlag = true
-  const painter = new Painter()
-
-  const onFrame = async (frame: { width: any; height: any; data: Iterable<number>; }, deps: Deps) => {
-    const {ctx, canvas2D} = deps;
-    const video = {
-      width: frame.width,
-      height: frame.height,
-      data: new Uint8Array(frame.data),
-    }
-
-    helper.value.drawCanvas2D(frame);
-
-    const t = Date.now()
-    // @ts-ignored
-    const prediction = await model.estimatePoses(video, {flipHorizontal: false})
-    console.log('predict cost', Date.now() - t)
-
-    painter.setCtx(ctx);
-    painter.setModel(state.currentDetectConfig.model);
-    painter.setCanvas2D(canvas2D);
-    painter.drawResults(prediction);
-  }
-
-  helper.value.set({onFrame});
-})
-
-const toggleDetect = () => {
-  if (!state.modelWarmFlag) {
-    uni.showToast({title: '模型热身中', icon: "loading"})
-    return
-  }
-  if (!state.isDetect) {
-    unref(helper).start()
-    state.isDetect = true
-  } else {
-    unref(helper).stop()
-    state.isDetect = false
-  }
-
-}
-
-onShow(() => {
-  console.log("onShow")
-})
-
-onHide(() => {
-  console.log("onHide")
-})
-
-</script>
-
 <style lang="scss">
 .tf-container {
   position: relative;
@@ -133,10 +42,10 @@ onHide(() => {
     position: absolute;
     display: flex;
     width: 100%;
-    height: 96px;
-    background-color: rgba(241, 241, 241, 0.4);
+    background: rgba(200, 200, 200, 0.6);
     justify-content: center;
     align-items: center;
+    z-index: 99;
   }
 
   .tf-content {
