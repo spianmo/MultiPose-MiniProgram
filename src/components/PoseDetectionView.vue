@@ -63,7 +63,6 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
       currentTime: new Date()
     })
   }
-  console.log('predict cost==>', Date.now() - t)
 
   painter.setCtx(ctx);
   painter.setModel(state.currentDetectConfig.model);
