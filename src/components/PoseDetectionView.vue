@@ -15,7 +15,7 @@ let model!: PoseDetector
 const painter = new Painter()
 
 const props = defineProps<{
-  detectModel: 'MoveNet-SinglePose-Lightning' | 'MoveNet-SinglePose-Thunder' | 'BlazePose-Lite' | 'PoseNet-MobileNetV1',
+  detectModel: 'MoveNet-SinglePose-Lightning' | 'MoveNet-SinglePose-Thunder' | 'BlazePose-Lite' | 'BlazePose-Full' | 'PoseNet-MobileNetV1',
   fpsCallback?: FpsCallback,
   cameraPosition: 'back' | 'front',
   detectCallback: DetectPoseCallback

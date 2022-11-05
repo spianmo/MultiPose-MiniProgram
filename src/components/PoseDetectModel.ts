@@ -60,6 +60,26 @@ export const DETECT_CONFIG: any = {
             detectorModelUrl: DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
             landmarkModelUrl: DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_LITE
         }
+    },
+    "BlazePose-Full": {
+        model: SupportedModels.BlazePose,
+        modelConfig: {
+            runtime: 'tfjs',
+            modelType: 'full',
+            enableSmoothing: true,
+            detectorModelUrl: DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
+            landmarkModelUrl: DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_FULL
+        }
+    },
+    "BlazePose-Heavy": {
+        model: SupportedModels.BlazePose,
+        modelConfig: {
+            runtime: 'tfjs',
+            modelType: 'heavy',
+            enableSmoothing: true,
+            detectorModelUrl: DEFAULT_BLAZEPOSE_DETECTOR_MODEL_URL,
+            landmarkModelUrl: DEFAULT_BLAZEPOSE_LANDMARK_MODEL_URL_HEAVY
+        }
     }
 }
 
