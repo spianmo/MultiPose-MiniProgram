@@ -2,7 +2,7 @@
 import * as tf from '@tensorflow/tfjs-core';
 import {createDetector} from "@tensorflow-models/pose-detection";
 import {Painter} from "../utils/painter";
-import {Deps, DETECT_CONFIG, FpsCallback} from "./PoseDetectModel";
+import {Deps, DETECT_CONFIG, DetectPoseCallback, FpsCallback, PoseCallback} from "./PoseDetectModel";
 import PoseCamera from "./PoseCamera.vue";
 import {computed, getCurrentInstance, onMounted, onUnmounted, reactive, ref, unref} from "vue";
 import {onePixel} from "../utils/utils";
@@ -17,7 +17,8 @@ const painter = new Painter()
 const props = defineProps<{
   detectModel: 'MoveNet-SinglePose-Lightning' | 'MoveNet-SinglePose-Thunder' | 'BlazePose-Lite' | 'PoseNet-MobileNetV1',
   fpsCallback?: FpsCallback,
-  cameraPosition: 'back' | 'front'
+  cameraPosition: 'back' | 'front',
+  detectCallback: DetectPoseCallback
 }>()
 
 const state = reactive({
@@ -54,6 +55,14 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
   const t = Date.now()
   // @ts-ignored
   const prediction = await model.estimatePoses(video, {flipHorizontal: false})
+
+  if(Array.isArray(prediction) && prediction.length >0){
+    props.detectCallback({
+      pose: prediction[0],
+      costTime: Date.now() - t,
+      currentTime: new Date()
+    })
+  }
   console.log('predict cost==>', Date.now() - t)
 
   painter.setCtx(ctx);
@@ -61,7 +70,7 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
   painter.setCanvas(canvas2D);
 
   if (!state.isDetect) return
-  unref(poseCamera).drawCanvas2D(frame);
+  unref(poseCamera).drawCameraFrame(frame);
   painter.drawResults(prediction);
 }
 
@@ -81,18 +90,17 @@ const toggleDetect = () => {
     return
   }
   if (!state.isDetect) {
-    unref(poseCamera).start()
+    unref(poseCamera).startDetect()
     state.isDetect = true
   } else {
-    unref(poseCamera).stop()
+    unref(poseCamera).stopDetect()
     state.isDetect = false
   }
-
 }
 
 defineExpose({
   getDetectStatus,
-  toggleDetect
+  toggleDetect,
 })
 
 </script>

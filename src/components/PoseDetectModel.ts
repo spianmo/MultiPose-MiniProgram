@@ -1,5 +1,5 @@
 import {Frame, FrameAdapter} from "../utils/FrameAdapter";
-import {movenet, SupportedModels} from "@tensorflow-models/pose-detection";
+import {movenet, Pose, SupportedModels} from "@tensorflow-models/pose-detection";
 
 let poseDetectModel: {
     canvas2D: HTMLCanvasElement;
@@ -64,6 +64,14 @@ export const DETECT_CONFIG: any = {
 }
 
 export type FpsCallback = (fps: string) => {}
+
+export type DetectResult = {
+    pose: Pose,
+    costTime: number,
+    currentTime: Date
+}
+
+export type DetectPoseCallback = (detectResult: DetectResult) => void
 
 export type FrameCallback = (frame: Frame, deps: Deps) => {}
 

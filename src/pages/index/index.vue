@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {computed, reactive, ref, unref} from "vue";
 import PoseDetectionView from "../../components/PoseDetectionView.vue";
+import {DetectPoseCallback, DetectResult} from "../../components/PoseDetectModel";
 
 const statusBarHeight = wx.getSystemInfoSync().statusBarHeight;
 const menuButtonLayoutInfo = wx.getMenuButtonBoundingClientRect();
 const poseDetectionView = ref<any>(null)
-
-const toggleDetect = () => unref(poseDetectionView)?.toggleDetect()
 
 const state: any = reactive({
   statusBarHeight: computed(() => statusBarHeight),
@@ -14,11 +13,25 @@ const state: any = reactive({
   isDetect: computed(() => unref(poseDetectionView)?.getDetectStatus())
 })
 
+/**
+ * 切换检测状态
+ */
+const toggleDetect = () => unref(poseDetectionView)?.toggleDetect()
+
+/**
+ * 检测相片帧的姿势回调
+ * @param detectResult
+ */
+const detectCallback: DetectPoseCallback = (detectResult: DetectResult) => {
+  console.log(detectResult)
+}
+
 </script>
 <template>
   <div class="tf-container">
     <div class="tf-content">
-      <PoseDetectionView ref="poseDetectionView" detect-model="BlazePose-Lite" camera-position="front"/>
+      <PoseDetectionView ref="poseDetectionView" detect-model="BlazePose-Lite" camera-position="front"
+                         :detect-callback="detectCallback"/>
     </div>
     <div :style="{
       paddingTop: `${state.statusBarHeight}px`,

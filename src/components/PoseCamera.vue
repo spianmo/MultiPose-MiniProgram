@@ -7,6 +7,7 @@ import {setupWechatPlatform} from "../tfjs-plugin/wechat_platform";
 import {fetchFunc} from "../tfjs-plugin/fetch";
 import {Frame, FrameAdapter} from "../utils/FrameAdapter";
 import {Deps, FpsCallback, FrameCallback} from "./PoseDetectModel";
+import {isIos} from "../utils/env";
 
 setupWechatPlatform({
   fetchFunc,
@@ -33,20 +34,20 @@ const props = defineProps<{
 const state: {
   FPS: string,
   backend: string,
-  inited: boolean,
   usingCamera: boolean,
   switchingBackend: boolean,
   canvas2DW: number,
   canvas2DH: number,
+  canvasHorizontalOffset: number,
   isDetect: boolean
 } = reactive({
   FPS: '0',
   backend: '',
-  inited: false,
   usingCamera: true,
   switchingBackend: false,
   canvas2DW: 0,
   canvas2DH: 0,
+  canvasHorizontalOffset: 0,
   isDetect: false
 })
 
@@ -58,8 +59,11 @@ let screenSize: {
   height: 0
 }
 
-
-const drawCanvas2D = (frame: Frame) => {
+/**
+ * 回绘制当前相片帧到2D Canvas画布
+ * @param frame
+ */
+const drawCameraFrame = (frame: Frame) => {
   poseDetectModel.ctx.clearRect(0, 0, poseDetectModel.canvas2D.width, poseDetectModel.canvas2D.height);
   poseDetectModel.canvas2D.width = frame.width;
   poseDetectModel.canvas2D.height = frame.height;
@@ -72,17 +76,31 @@ const drawCanvas2D = (frame: Frame) => {
   poseDetectModel.ctx.putImageData(imageData, 0, 0);
 }
 
-const start = () => {
+/**
+ * 开始姿势识别
+ */
+const startDetect = () => {
   poseDetectModel.cameraListener.start();
   state.canvas2DH = screenSize.height
   state.canvas2DW = screenSize.width
   state.isDetect = true
 }
-const stop = () => {
+
+/**
+ * 停止姿势识别
+ */
+const stopDetect = () => {
   poseDetectModel.cameraListener.stop();
   state.canvas2DH = 0
   state.canvas2DW = 0
   state.isDetect = false
+}
+
+/**
+ * 获取画布横向对齐, 因为iOS Camera大小与实际取得的相片帧大小不符 unit: px
+ */
+const getCanvasHorizontalOffset = () => {
+  return Math.abs(state.canvasHorizontalOffset)
 }
 
 onMounted(async () => {
@@ -103,7 +121,7 @@ onMounted(async () => {
     );
     let canvasSizeInited = false;
 
-    frameAdapter.onProcessFrame(async (frame:Frame) => {
+    frameAdapter.onProcessFrame(async (frame: Frame) => {
       if (!canvasSizeInited) {
         const [canvas2DW, canvas2DH] = objectFit(
             frame.width,
@@ -117,6 +135,9 @@ onMounted(async () => {
         }
         state.canvas2DH = canvas2DH
         state.canvas2DW = canvas2DW
+        if (isIos) {
+          state.canvasHorizontalOffset = (windowWidth - state.canvas2DW) / 2
+        }
         canvasSizeInited = true;
       }
       if (props.frameCallback && !state.switchingBackend) {
@@ -142,7 +163,6 @@ onMounted(async () => {
   })
 })
 
-
 onUnmounted(() => {
   if (state.usingCamera) poseDetectModel?.cameraListener.stop();
   // @ts-ignore
@@ -150,18 +170,20 @@ onUnmounted(() => {
 })
 
 defineExpose({
-  drawCanvas2D,
-  start,
-  stop
+  drawCameraFrame,
+  startDetect,
+  stopDetect,
+  getCanvasHorizontalOffset
 })
 
 </script>
 <template>
   <div class="pose-camera">
-    <camera class="camera" frame-size="medium" :device-position="cameraPosition" />
+    <camera class="camera" frame-size="medium" :device-position="cameraPosition"/>
     <canvas class="canvas" type="2d" id="canvas" :style="{
       width: `${state.canvas2DW}px`,
-      height: `${state.canvas2DH}px`
+      height: `${state.canvas2DH}px`,
+      left: `${state.canvasHorizontalOffset}px`
     }"></canvas>
   </div>
 </template>
@@ -176,7 +198,6 @@ defineExpose({
     height: 100vh;
     position: absolute;
     bottom: 0;
-    left: 0;
   }
 
   .camera {
