@@ -8,8 +8,6 @@ import {computed, getCurrentInstance, onMounted, onUnmounted, reactive, ref, unr
 import {onePixel} from "../utils/utils";
 import {PoseDetector} from "@tensorflow-models/pose-detection/dist/pose_detector";
 import {Frame} from "../utils/FrameAdapter";
-import {clearRafInterval, setRafInterval} from "../utils/raf-interval";
-import {Pose} from "@tensorflow-models/pose-detection/dist/types";
 
 const poseCamera = ref<any>(null)
 let model!: PoseDetector
