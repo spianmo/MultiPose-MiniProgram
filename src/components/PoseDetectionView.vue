@@ -13,9 +13,6 @@ import {Pose} from "@tensorflow-models/pose-detection/dist/types";
 
 const poseCamera = ref<any>(null)
 let model!: PoseDetector
-let intervalHandle = 0
-let lastPrediction!: Pose[]
-let lastCameraFrame!: Frame
 
 const painter = new Painter()
 
@@ -33,6 +30,7 @@ const state = reactive({
 
 
 onMounted(async () => {
+  console.log("current camera: ", props.cameraPosition)
   await tf.ready()
   model = await createDetector(state.currentDetectConfig.model, state.currentDetectConfig.modelConfig)
   console.log('model load end')
@@ -42,16 +40,6 @@ onMounted(async () => {
   await model.estimatePoses(onePixel, {flipHorizontal: false})
   console.log('model warm up', Date.now() - t)
   state.modelWarmFlag = true
-
-  intervalHandle = setRafInterval(() => {
-    if (!state.isDetect) return
-    unref(poseCamera).drawCanvas2D(lastCameraFrame);
-    painter.drawResults(lastPrediction);
-  }, 1000 / 60)
-})
-
-onUnmounted(() => {
-  clearRafInterval(intervalHandle)
 })
 
 
@@ -62,18 +50,21 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
     height: frame.height,
     data: new Uint8Array(frame.data),
   }
-  lastCameraFrame = frame
   if (!model) {
     return
   }
   const t = Date.now()
   // @ts-ignored
-  lastPrediction = await model.estimatePoses(video, {flipHorizontal: false})
-  console.log('predict cost', Date.now() - t)
+  const prediction = await model.estimatePoses(video, {flipHorizontal: false})
+  console.log('predict cost==>', Date.now() - t)
 
   painter.setCtx(ctx);
   painter.setModel(state.currentDetectConfig.model);
   painter.setCanvas(canvas2D);
+
+  if (!state.isDetect) return
+  unref(poseCamera).drawCanvas2D(frame);
+  painter.drawResults(prediction);
 }
 
 /**
