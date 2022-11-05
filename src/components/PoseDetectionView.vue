@@ -2,9 +2,9 @@
 import * as tf from '@tensorflow/tfjs-core';
 import {createDetector} from "@tensorflow-models/pose-detection";
 import {Painter} from "../utils/painter";
-import {Deps, DETECT_CONFIG, DetectPoseCallback, FpsCallback, PoseCallback} from "./PoseDetectModel";
+import {Deps, DETECT_CONFIG, DetectPoseCallback, FpsCallback} from "./PoseDetectModel";
 import PoseCamera from "./PoseCamera.vue";
-import {computed, getCurrentInstance, onMounted, onUnmounted, reactive, ref, unref} from "vue";
+import {computed, onMounted, reactive, ref, unref} from "vue";
 import {onePixel} from "../utils/utils";
 import {PoseDetector} from "@tensorflow-models/pose-detection/dist/pose_detector";
 import {Frame} from "../utils/FrameAdapter";
@@ -56,7 +56,7 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
   // @ts-ignored
   const prediction = await model.estimatePoses(video, {flipHorizontal: false})
 
-  if(Array.isArray(prediction) && prediction.length >0){
+  if (Array.isArray(prediction) && prediction.length > 0) {
     props.detectCallback({
       pose: prediction[0],
       costTime: Date.now() - t,

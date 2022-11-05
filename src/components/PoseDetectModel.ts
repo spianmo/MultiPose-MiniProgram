@@ -34,7 +34,7 @@ export const DETECT_CONFIG: any = {
         modelConfig: {
             architecture: 'MobileNetV1',
             outputStride: 16,
-            inputResolution: { width: 640, height: 480 },
+            inputResolution: {width: 640, height: 480},
             multiplier: 0.75,
             modelUrl: POSENET_URL
         }

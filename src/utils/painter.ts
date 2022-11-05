@@ -17,109 +17,110 @@
 import * as poseDetection from '@tensorflow-models/pose-detection';
 
 export class Painter {
-  ctx!: CanvasRenderingContext2D;
-  canvas!: HTMLCanvasElement;
-  model!: poseDetection.SupportedModels;
+    ctx!: CanvasRenderingContext2D;
+    canvas!: HTMLCanvasElement;
+    model!: poseDetection.SupportedModels;
 
-  setCtx(ctx: CanvasRenderingContext2D) {
-    this.ctx = ctx
-  }
-
-  setCanvas(canvas: HTMLCanvasElement) {
-    this.canvas = canvas
-  }
-  /**
-   * Draw the keypoints and skeleton on the video.
-   * @param poses A list of poses to render.
-   */
-  drawResults(poses: Array<poseDetection.Pose>) {
-    for (const pose of poses) {
-      this.drawResult(pose);
-    }
-  }
-
-  /**
-   * Draw the keypoints and skeleton on the video.
-   * @param pose A pose with keypoints to render.
-   */
-  drawResult(pose: poseDetection.Pose) {
-    if (pose.keypoints != null) {
-      this.drawKeypoints(pose.keypoints);
-      this.drawSkeleton(pose.keypoints);
-    }
-  }
-
-  /**
-   * Draw the keypoints on the video.
-   * @param keypoints A list of keypoints.
-   */
-  drawKeypoints(keypoints: Array<poseDetection.Keypoint>) {
-
-    const keypointInd =
-      poseDetection.util.getKeypointIndexBySide(this.model);
-    this.ctx.fillStyle = 'White';
-    this.ctx.strokeStyle = 'White';
-    this.ctx.lineWidth = 2;
-
-    for (const i of keypointInd.middle) {
-      this.drawKeypoint(keypoints[i]);
+    setCtx(ctx: CanvasRenderingContext2D) {
+        this.ctx = ctx
     }
 
-    this.ctx.fillStyle = '#0ad4ea';
-    for (const i of keypointInd.left) {
-      this.drawKeypoint(keypoints[i]);
+    setCanvas(canvas: HTMLCanvasElement) {
+        this.canvas = canvas
     }
 
-    this.ctx.fillStyle = '#ffbd29';
-    for (const i of keypointInd.right) {
-      this.drawKeypoint(keypoints[i]);
+    /**
+     * Draw the keypoints and skeleton on the video.
+     * @param poses A list of poses to render.
+     */
+    drawResults(poses: Array<poseDetection.Pose>) {
+        for (const pose of poses) {
+            this.drawResult(pose);
+        }
     }
-  }
 
-  drawKeypoint(keypoint: poseDetection.Keypoint) {
-    // If score is null, just show the keypoint.
-    const score = keypoint.score != null ? keypoint.score : 1;
-    const scoreThreshold = 0.3;
-
-    if (score >= scoreThreshold) {
-      // @ts-ignored
-      const circle = this.canvas.createPath2D();
-      circle.arc(keypoint.x, keypoint.y, 4, 0, 2 * Math.PI);
-      this.ctx.fill(circle);
-      this.ctx.stroke(circle);
+    /**
+     * Draw the keypoints and skeleton on the video.
+     * @param pose A pose with keypoints to render.
+     */
+    drawResult(pose: poseDetection.Pose) {
+        if (pose.keypoints != null) {
+            this.drawKeypoints(pose.keypoints);
+            this.drawSkeleton(pose.keypoints);
+        }
     }
-  }
 
-  /**
-   * Draw the skeleton of a body on the video.
-   * @param keypoints A list of keypoints.
-   */
-  drawSkeleton(keypoints: Array<poseDetection.Keypoint>) {
-    this.ctx.fillStyle = 'White';
-    this.ctx.strokeStyle = 'White';
-    this.ctx.lineWidth = 2;
+    /**
+     * Draw the keypoints on the video.
+     * @param keypoints A list of keypoints.
+     */
+    drawKeypoints(keypoints: Array<poseDetection.Keypoint>) {
 
-    poseDetection.util.getAdjacentPairs(this.model).forEach(([
-      i, j
-    ]) => {
-      const kp1 = keypoints[i];
-      const kp2 = keypoints[j];
+        const keypointInd =
+            poseDetection.util.getKeypointIndexBySide(this.model);
+        this.ctx.fillStyle = 'White';
+        this.ctx.strokeStyle = 'White';
+        this.ctx.lineWidth = 2;
 
-      // If score is null, just show the keypoint.
-      const score1 = kp1.score != null ? kp1.score : 1;
-      const score2 = kp2.score != null ? kp2.score : 1;
-      const scoreThreshold = 0.3;
+        for (const i of keypointInd.middle) {
+            this.drawKeypoint(keypoints[i]);
+        }
 
-      if (score1 >= scoreThreshold && score2 >= scoreThreshold) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(kp1.x, kp1.y);
-        this.ctx.lineTo(kp2.x, kp2.y);
-        this.ctx.stroke();
-      }
-    });
-  }
+        this.ctx.fillStyle = '#0ad4ea';
+        for (const i of keypointInd.left) {
+            this.drawKeypoint(keypoints[i]);
+        }
 
-  setModel(model: poseDetection.SupportedModels) {
-    this.model = model
-  }
+        this.ctx.fillStyle = '#ffbd29';
+        for (const i of keypointInd.right) {
+            this.drawKeypoint(keypoints[i]);
+        }
+    }
+
+    drawKeypoint(keypoint: poseDetection.Keypoint) {
+        // If score is null, just show the keypoint.
+        const score = keypoint.score != null ? keypoint.score : 1;
+        const scoreThreshold = 0.3;
+
+        if (score >= scoreThreshold) {
+            // @ts-ignored
+            const circle = this.canvas.createPath2D();
+            circle.arc(keypoint.x, keypoint.y, 4, 0, 2 * Math.PI);
+            this.ctx.fill(circle);
+            this.ctx.stroke(circle);
+        }
+    }
+
+    /**
+     * Draw the skeleton of a body on the video.
+     * @param keypoints A list of keypoints.
+     */
+    drawSkeleton(keypoints: Array<poseDetection.Keypoint>) {
+        this.ctx.fillStyle = 'White';
+        this.ctx.strokeStyle = 'White';
+        this.ctx.lineWidth = 2;
+
+        poseDetection.util.getAdjacentPairs(this.model).forEach(([
+                                                                     i, j
+                                                                 ]) => {
+            const kp1 = keypoints[i];
+            const kp2 = keypoints[j];
+
+            // If score is null, just show the keypoint.
+            const score1 = kp1.score != null ? kp1.score : 1;
+            const score2 = kp2.score != null ? kp2.score : 1;
+            const scoreThreshold = 0.3;
+
+            if (score1 >= scoreThreshold && score2 >= scoreThreshold) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(kp1.x, kp1.y);
+                this.ctx.lineTo(kp2.x, kp2.y);
+                this.ctx.stroke();
+            }
+        });
+    }
+
+    setModel(model: poseDetection.SupportedModels) {
+        this.model = model
+    }
 }
