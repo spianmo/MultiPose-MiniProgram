@@ -158,7 +158,7 @@ onMounted(() => {
     background: rgba(200, 200, 200, 0.6);
     justify-content: center;
     align-items: center;
-    z-index: 99;
+    z-index: 9999;
   }
 
   .tf-content {
@@ -175,6 +175,7 @@ onMounted(() => {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    z-index: 10;
   }
 
 
@@ -228,6 +229,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     bottom: 0;
+    z-index: 9999;
     background: rgba(200, 200, 200, 0.6);
 
     .tf-btn-start {
