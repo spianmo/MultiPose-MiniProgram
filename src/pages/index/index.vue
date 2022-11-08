@@ -8,19 +8,62 @@ const statusBarHeight = wx.getSystemInfoSync().statusBarHeight;
 const menuButtonLayoutInfo = wx.getMenuButtonBoundingClientRect();
 const poseDetectionView = ref<any>(null)
 
-const state: any = reactive({
+
+enum UIState {'init', 'onStarting', 'onGaming'}
+
+type UIElement = {
+  splash: boolean,
+  controlPane: boolean,
+  startAnimate: boolean
+}
+
+/**
+ * UI State状态机
+ */
+const stateMachine: Map<UIState, UIElement> = new Map<UIState, UIElement>([
+  [UIState.init, {
+    splash: true,
+    controlPane: true,
+    startAnimate: false
+  }],
+  [UIState.onStarting, {
+    splash: false,
+    controlPane: false,
+    startAnimate: true
+  }],
+  [UIState.onGaming, {
+    splash: false,
+    controlPane: true,
+    startAnimate: false
+  }]
+])
+
+/**
+ * Reactive Variable
+ */
+const state: {
+  statusBarHeight: number,
+  toolbarHeight: number,
+  isDetect: boolean,
+  titleEntranceAniName: string,
+  titleBgUrl: string,
+  currentState: UIState,
+  currentUIState?: UIElement
+} = reactive({
   statusBarHeight: computed(() => statusBarHeight),
   toolbarHeight: computed(() => (menuButtonLayoutInfo.height + (menuButtonLayoutInfo.top - statusBarHeight) * 2)),
   isDetect: computed(() => unref(poseDetectionView)?.getDetectStatus()),
-  startAnimVisible: false,
-  titleEntranceAniName: ''
+  titleEntranceAniName: '',
+  titleBgUrl: '',
+  currentState: UIState.init,
+  currentUIState: computed(() => stateMachine.get(state.currentState))
 })
 
 /**
  * 切换检测状态
  */
-const toggleDetect = () => {
-  state.startAnimVisible = false
+const startDetect = () => {
+  state.currentState = UIState.onGaming
   unref(poseDetectionView)?.toggleDetect()
 }
 
@@ -32,11 +75,15 @@ const detectCallback: DetectPoseCallback = (detectResult: DetectResult) => {
   console.log(detectResult)
 }
 
-const startGame = () => {
+/**
+ * 开始按钮点击
+ */
+const btnStartClick = () => {
   if (!state.isDetect) {
-    state.startAnimVisible = true
+    state.currentState = UIState.onStarting
   } else {
-    toggleDetect()
+    state.currentState = UIState.init
+    unref(poseDetectionView)?.toggleDetect()
   }
 }
 
@@ -60,20 +107,22 @@ onMounted(() => {
     }" class="tf-appbar">
     </div>
 
-    <!--姿势检测驱动视图-->
+    <!--图层：姿势检测驱动-->
     <div class="tf-content">
       <PoseDetectionView ref="poseDetectionView" detect-model="BlazePose-Lite" camera-position="front"
                          :detect-callback="detectCallback"/>
     </div>
 
-    <!--开始倒计时动画-->
-    <div v-if="!state.startAnimVisible && !state.isDetect" class="tf-layer">
+    <!--图层：Splash-->
+    <div v-if="state.currentUIState.splash" class="tf-layer">
       <!--标题-->
       <div
           :style="`background-image: url(${state.titleBgUrl});`"
           :class="state.titleEntranceAniName"
           class="tf-title bg-cover animate__animated animate__duration-600ms"
       />
+
+      <!--标题描述-->
       <div
           class="tf-introduction font-common animate__animated animate__infinite animate__duration-2000ms animate__pulse">
         <div>将手机摄像头打开，对准自己全身，跟着神经网络姿势推理进行运动训练。</div>
@@ -81,16 +130,17 @@ onMounted(() => {
       </div>
     </div>
 
+    <!--图层：动画-->
     <div class="tf-layer-ani">
-      <!--开始动画倒计时-->
-      <StartAnimation v-if="state.startAnimVisible" :start-game="toggleDetect"/>
+      <!--开始倒计时动画-->
+      <StartAnimation v-if="state.currentUIState.startAnimate" :start-game="startDetect"/>
     </div>
 
     <!--底部操作按钮-->
-    <div v-if="!state.startAnimVisible || state.isDetect" class="tf-footer">
+    <div v-if="state.currentUIState.controlPane" class="tf-footer">
       <div
           class="handle-area inner-element-center animate__animated animate__infinite animate__duration-2000ms animate__pulse">
-        <div @click="startGame" class="tf-btn-start"/>
+        <div @click="btnStartClick" class="tf-btn-start"/>
       </div>
     </div>
   </div>
