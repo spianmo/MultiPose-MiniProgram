@@ -13,6 +13,7 @@ enum UIState {'init', 'onStarting', 'onGaming'}
 
 type UIElement = {
   splash: boolean,
+  appbar: boolean,
   controlPane: boolean,
   startAnimate: boolean
 }
@@ -23,16 +24,19 @@ type UIElement = {
 const stateMachine: Map<UIState, UIElement> = new Map<UIState, UIElement>([
   [UIState.init, {
     splash: true,
+    appbar: false,
     controlPane: true,
     startAnimate: false
   }],
   [UIState.onStarting, {
     splash: false,
+    appbar: true,
     controlPane: false,
     startAnimate: true
   }],
   [UIState.onGaming, {
     splash: false,
+    appbar: true,
     controlPane: true,
     startAnimate: false
   }]
@@ -90,11 +94,11 @@ const btnStartClick = () => {
 onMounted(() => {
   setTimeout(() => {
     state.titleEntranceAniName = 'animate__zoomIn'
-    state.titleBgUrl = 'https://mms-voice-fe.cdn.bcebos.com/pdproject/clas/wx-project/title_logo_2109011341.png'
+    state.titleBgUrl = 'http://oss.cache.ren/img/cv-xmxx-logo.png'
     setTimeout(() => {
       state.titleEntranceAniName = 'animate__bounce'
-    }, 500);
-  }, 800);
+    }, 200);
+  }, 400);
 })
 
 </script>
@@ -104,7 +108,7 @@ onMounted(() => {
     <div :style="{
       paddingTop: `${state.statusBarHeight}px`,
       height: `${state.toolbarHeight}px`
-    }" class="tf-appbar">
+    }" class="tf-appbar" v-if="state.currentUIState.appbar">
     </div>
 
     <!--图层：姿势检测驱动-->
@@ -114,7 +118,7 @@ onMounted(() => {
     </div>
 
     <!--图层：Splash-->
-    <div v-if="state.currentUIState.splash" class="tf-layer">
+    <div v-if="state.currentUIState.splash" class="tf-layer bg-cover">
       <!--标题-->
       <div
           :style="`background-image: url(${state.titleBgUrl});`"
@@ -122,11 +126,13 @@ onMounted(() => {
           class="tf-title bg-cover animate__animated animate__duration-600ms"
       />
 
+      <div class="tf-title-logo bg-cover animate__animated animate__infinite animate__duration-2000ms animate__tada"/>
+
       <!--标题描述-->
       <div
-          class="tf-introduction font-common animate__animated animate__infinite animate__duration-2000ms animate__pulse">
+          class="tf-introduction font-rmtt animate__animated animate__infinite animate__duration-2000ms animate__pulse">
         <div>将手机摄像头打开，对准自己全身，跟着神经网络姿势推理进行运动训练。</div>
-        <div>训练结束后看看自己的得分能达到多少排名，快来开始吧！</div>
+        <div>训练结束后看看自己的得分，快来开始吧！</div>
       </div>
     </div>
 
@@ -189,8 +195,9 @@ onMounted(() => {
     flex-direction: column;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+    background-image: url("https://mms-voice-fe.cdn.bcebos.com/pdproject/clas/wx-project/home_bg_2109011341.png");
 
-    .tf-game-title {
+    .tf-game-title-deprecated {
       font-family: RMTT;
       font-size: 58px;
       background: linear-gradient(to right, #ff6f00, #ff9100);
@@ -200,9 +207,19 @@ onMounted(() => {
       height: fit-content;
     }
 
+    .tf-title-logo {
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      right: 20px;
+      margin-top: -240px;
+      background-image: url(https://mms-voice-fe.cdn.bcebos.com/pdproject/clas/wx-project/figure_icon.png);
+    }
+
     .tf-title {
       width: 84.46vw;
       height: 28.09vw;
+      z-index: 10;
     }
 
     .tf-introduction {
