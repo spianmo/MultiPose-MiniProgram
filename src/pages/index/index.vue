@@ -13,6 +13,7 @@ enum UIState {'init', 'onStarting', 'onGaming'}
 
 type UIElement = {
   splash: boolean,
+  background: boolean,
   appbar: boolean,
   controlPane: boolean,
   startAnimate: boolean
@@ -24,18 +25,21 @@ type UIElement = {
 const stateMachine: Map<UIState, UIElement> = new Map<UIState, UIElement>([
   [UIState.init, {
     splash: true,
+    background: true,
     appbar: false,
     controlPane: true,
     startAnimate: false
   }],
   [UIState.onStarting, {
     splash: false,
+    background: false,
     appbar: true,
     controlPane: false,
     startAnimate: true
   }],
   [UIState.onGaming, {
     splash: false,
+    background: false,
     appbar: true,
     controlPane: true,
     startAnimate: false
@@ -52,7 +56,7 @@ const state: {
   titleEntranceAniName: string,
   titleBgUrl: string,
   currentState: UIState,
-  currentUIState?: UIElement
+  UIState?: UIElement
 } = reactive({
   statusBarHeight: computed(() => statusBarHeight),
   toolbarHeight: computed(() => (menuButtonLayoutInfo.height + (menuButtonLayoutInfo.top - statusBarHeight) * 2)),
@@ -60,7 +64,7 @@ const state: {
   titleEntranceAniName: '',
   titleBgUrl: '',
   currentState: UIState.init,
-  currentUIState: computed(() => stateMachine.get(state.currentState))
+  UIState: computed(() => stateMachine.get(state.currentState))
 })
 
 /**
@@ -108,7 +112,7 @@ onMounted(() => {
     <div :style="{
       paddingTop: `${state.statusBarHeight}px`,
       height: `${state.toolbarHeight}px`
-    }" class="tf-appbar" v-if="state.currentUIState.appbar">
+    }" class="tf-appbar" v-if="state.UIState.appbar">
     </div>
 
     <!--图层：姿势检测驱动-->
@@ -117,8 +121,11 @@ onMounted(() => {
                          :detect-callback="detectCallback"/>
     </div>
 
+    <!--图层：背景图层-->
+    <div class="tf-layer-bg bg-cover" v-if="state.UIState.background"></div>
+
     <!--图层：Splash-->
-    <div class="tf-layer bg-cover" v-if="state.currentUIState.splash">
+    <div class="tf-layer bg-cover" v-if="state.UIState.splash">
       <!--标题-->
       <div
           :style="`background-image: url(${state.titleBgUrl});`"
@@ -139,11 +146,11 @@ onMounted(() => {
     <!--图层：动画-->
     <div class="tf-layer-ani">
       <!--开始倒计时动画-->
-      <StartAnimation v-if="state.currentUIState.startAnimate" :start-game="startDetect"/>
+      <StartAnimation v-if="state.UIState.startAnimate" :start-game="startDetect"/>
     </div>
 
     <!--底部操作按钮-->
-    <div v-if="state.currentUIState.controlPane" class="tf-footer">
+    <div v-if="state.UIState.controlPane" class="tf-footer">
       <div
           class="handle-area inner-element-center animate__animated animate__infinite animate__duration-2000ms animate__pulse">
         <div @click="btnStartClick" class="tf-btn-start"/>
@@ -184,6 +191,12 @@ onMounted(() => {
     z-index: 10;
   }
 
+  .tf-layer-bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url("https://mms-voice-fe.cdn.bcebos.com/pdproject/clas/wx-project/home_bg_2109011341.png");
+  }
 
   .tf-layer {
     position: absolute;
@@ -195,7 +208,7 @@ onMounted(() => {
     flex-direction: column;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    background-image: url("https://mms-voice-fe.cdn.bcebos.com/pdproject/clas/wx-project/home_bg_2109011341.png");
+
 
     .tf-game-title-deprecated {
       font-family: RMTT;
