@@ -195,7 +195,7 @@ onMounted(() => {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: url("https://mms-voice-fe.cdn.bcebos.com/pdproject/clas/wx-project/home_bg_2109011341.png");
+    background-image: url(https://mms-voice-fe.cdn.bcebos.com/pdproject/clas/wx-project/home_bg_2109011341.png);
   }
 
   .tf-layer {

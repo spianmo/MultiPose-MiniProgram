@@ -44,7 +44,7 @@ onMounted(async () => {
 
 const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
   const {ctx, canvas2D} = poseDetectModel;
-  const video = {
+  const cameraFrame = {
     width: frame.width,
     height: frame.height,
     data: new Uint8Array(frame.data),
@@ -54,7 +54,7 @@ const onFrame = async (frame: Frame, poseDetectModel: Deps) => {
   }
   const t = Date.now()
   // @ts-ignored
-  const prediction = await model.estimatePoses(video, {flipHorizontal: false})
+  const prediction = await model.estimatePoses(cameraFrame, {flipHorizontal: false})
 
   if (Array.isArray(prediction) && prediction.length > 0) {
     props.detectCallback({
