@@ -26,7 +26,7 @@ const stateMachine: Map<UIState, UIElement> = new Map<UIState, UIElement>([
   [UIState.init, {
     splash: true,
     background: true,
-    appbar: false,
+    appbar: true,
     controlPane: true,
     startAnimate: false
   }],
