@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import {onMounted, reactive, watch, watchEffect} from "vue";
+import {onMounted, reactive, watch} from "vue";
 import Timer from "./Timer";
 
 const props = defineProps<{
-  startGame: ()=>void
+  preStart?: () => void
+  startGame: () => void
 }>()
 
 let startCountdownTimer!: Timer
@@ -59,7 +60,6 @@ watch(() => state.countdownEntranceAni, (newValue, oldValue) => {
 })
 
 
-
 watch(() => state.countdownExitAni, (newValue, oldValue) => {
   if (newValue) {
     // 执行退场动画
@@ -74,7 +74,7 @@ onMounted(() => {
   startCountdownTimer = new Timer({
     duration: 3,
     interval: state._countdownEntranceAniDuration + state._countdownExitAniDuration, // 间隔时间为倒计时入场退场延时之和
-    intervalCallBack: (time:number) => {
+    intervalCallBack: (time: number) => {
       // 间隔回调
       if (time === 0) {
         return;
@@ -89,12 +89,12 @@ onMounted(() => {
         state.GOExitAni = true
         // 结束事件
         setTimeout(() => {
-          props.startGame()
         }, state._GOExitAniDuration);
       }, state._GOEntranceAniDuration + 300);
     }
   });
   state.startCountdown = true
+  props?.startGame()
 })
 </script>
 <template>

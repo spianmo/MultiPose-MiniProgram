@@ -23,8 +23,7 @@ const props = defineProps<{
 
 const state = reactive({
   isDetect: false,
-  currentDetectConfig: computed(() => DETECT_CONFIG[props.detectModel]),
-  modelWarmFlag: false
+  currentDetectConfig: computed(() => DETECT_CONFIG[props.detectModel])
 })
 
 
@@ -33,12 +32,8 @@ onMounted(async () => {
   await tf.ready()
   model = await createDetector(state.currentDetectConfig.model, state.currentDetectConfig.modelConfig)
   console.log('model load end')
-  const t = Date.now()
 
-  // @ts-ignored
-  await model.estimatePoses(onePixel, {flipHorizontal: false})
-  console.log('model warm up', Date.now() - t)
-  state.modelWarmFlag = true
+  await warmModel()
 })
 
 
@@ -84,10 +79,6 @@ const getDetectStatus = () => {
  * 切换Pose检测开关
  */
 const toggleDetect = () => {
-  if (!state.modelWarmFlag) {
-    uni.showToast({title: '模型热身中', icon: "loading"})
-    return
-  }
   if (!state.isDetect) {
     unref(poseCamera).startDetect()
     state.isDetect = true
@@ -97,9 +88,20 @@ const toggleDetect = () => {
   }
 }
 
+/**
+ * 预推理模型加速，首帧推理速度
+ */
+const warmModel = async () => {
+  const t = Date.now()
+
+  // @ts-ignored
+  await model.estimatePoses(onePixel, {flipHorizontal: false})
+  console.log('model warm up', Date.now() - t, new Date())
+}
+
 defineExpose({
   getDetectStatus,
-  toggleDetect,
+  toggleDetect
 })
 
 </script>
