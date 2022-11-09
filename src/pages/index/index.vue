@@ -112,13 +112,13 @@ onMounted(() => {
     </div>
 
     <!--图层：姿势检测驱动-->
-    <div class="tf-content">
+    <div class="tf-layer-pose">
       <PoseDetectionView ref="poseDetectionView" detect-model="BlazePose-Lite" camera-position="front"
                          :detect-callback="detectCallback"/>
     </div>
 
     <!--图层：Splash-->
-    <div v-if="state.currentUIState.splash" class="tf-layer bg-cover">
+    <div class="tf-layer bg-cover" v-if="state.currentUIState.splash">
       <!--标题-->
       <div
           :style="`background-image: url(${state.titleBgUrl});`"
@@ -167,7 +167,7 @@ onMounted(() => {
     z-index: 9999;
   }
 
-  .tf-content {
+  .tf-layer-pose {
     position: absolute;
     width: 100%;
     height: 100%;
