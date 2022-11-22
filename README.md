@@ -1,6 +1,6 @@
 # MultiPose-MiniProgram
 
-> 基于Vite, TypeScript, UniCli, Vue3完成微信小程序中的人体姿势检测，支持PoseNet、MoveNet、BlazePose模型
+> Vite, TypeScript, UniCli, Vue3。微信小程序中的人体姿势检测，支持PoseNet、MoveNet、BlazePose模型
 
 - 已封装组件，支持微信前后置摄像头的切换，FPS回调，逐帧检测结果回调
 
